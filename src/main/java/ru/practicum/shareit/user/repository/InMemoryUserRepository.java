@@ -42,7 +42,7 @@ public class InMemoryUserRepository implements UserRepository {
         if (emailStorage.get(user.getEmail()) != null) {
             throw new UserEmailDuplication();
         }
-        
+
         if (user.getId() == null) {
             user.setId(readyIndex.incrementAndGet());
 
