@@ -5,10 +5,7 @@ import ru.practicum.shareit.exceptions.EntityIsNotFoundException;
 import ru.practicum.shareit.exceptions.UserEmailDuplication;
 import ru.practicum.shareit.user.model.User;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Repository
@@ -35,8 +32,8 @@ public class InMemoryUserRepository implements UserRepository {
     }
 
     @Override
-    public Iterable<User> findAll() {
-        return idStorage.values();
+    public List<User> findAll() {
+        return new ArrayList<>(idStorage.values());
     }
 
     @Override

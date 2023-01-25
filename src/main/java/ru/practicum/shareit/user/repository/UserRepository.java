@@ -2,10 +2,12 @@ package ru.practicum.shareit.user.repository;
 
 import ru.practicum.shareit.user.model.User;
 
+import java.util.List;
+
 public interface UserRepository {
     void deleteById(Long id);
 
-    Iterable<User> findAll();
+    List<User> findAll();
 
     User save(User user);
 

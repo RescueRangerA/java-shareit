@@ -15,7 +15,6 @@ import javax.security.sasl.AuthenticationException;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Service
 public class ItemServiceImpl implements ItemService {
@@ -35,8 +34,8 @@ public class ItemServiceImpl implements ItemService {
     public List<ItemResponseDto> findAll() {
         User currentUser = (User) authenticationFacade.getAuthentication().getPrincipal();
 
-        return StreamSupport
-                .stream(itemRepository.findAllAvailableForUser(currentUser).spliterator(), false)
+        return itemRepository.findAllAvailableForUser(currentUser)
+                .stream()
                 .map(itemMapper::toItemResponseDto)
                 .collect(Collectors.toList());
     }
@@ -47,11 +46,8 @@ public class ItemServiceImpl implements ItemService {
             return Collections.emptyList();
         }
 
-        return StreamSupport
-                .stream(
-                        itemRepository.findAllAvailableByNameOrDescriptionContainingCaseInsensitive(text).spliterator(),
-                        false
-                )
+        return itemRepository.findAllAvailableByNameOrDescriptionContainingCaseInsensitive(text)
+                .stream()
                 .map(itemMapper::toItemResponseDto)
                 .collect(Collectors.toList());
     }

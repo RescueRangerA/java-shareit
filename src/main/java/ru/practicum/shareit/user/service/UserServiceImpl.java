@@ -11,7 +11,6 @@ import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -27,8 +26,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserResponseDto> findAll() {
-        return StreamSupport
-                .stream(userRepository.findAll().spliterator(), false)
+        return userRepository.findAll()
+                .stream()
                 .map(userMapper::toUserResponseDto)
                 .collect(Collectors.toList());
     }

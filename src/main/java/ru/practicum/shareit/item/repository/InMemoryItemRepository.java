@@ -5,7 +5,9 @@ import ru.practicum.shareit.exceptions.EntityIsNotFoundException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -27,12 +29,12 @@ public class InMemoryItemRepository implements ItemRepository {
     }
 
     @Override
-    public Iterable<Item> findAll() {
-        return storage.values();
+    public List<Item> findAll() {
+        return new ArrayList<>(storage.values());
     }
 
     @Override
-    public Iterable<Item> findAllAvailableForUser(User user) {
+    public List<Item> findAllAvailableForUser(User user) {
         return storage
                 .values()
                 .stream()
@@ -79,7 +81,7 @@ public class InMemoryItemRepository implements ItemRepository {
     }
 
     @Override
-    public Iterable<Item> findAllAvailableByNameOrDescriptionContainingCaseInsensitive(String query) {
+    public List<Item> findAllAvailableByNameOrDescriptionContainingCaseInsensitive(String query) {
         String lowerQuery = query.toLowerCase();
 
         return storage
