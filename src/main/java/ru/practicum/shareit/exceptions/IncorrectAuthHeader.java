@@ -8,4 +8,12 @@ public class IncorrectAuthHeader extends RuntimeException {
     public IncorrectAuthHeader(String headerValue) {
         super(String.format("Corrupted auth header has been provided '%s'", headerValue));
     }
+
+    public IncorrectAuthHeader(String headerValue, Exception exception) {
+        super(
+                String.format("Corrupted auth header has been provided '%s'. Reason: %s.",
+                        headerValue,
+                        exception.getMessage())
+        );
+    }
 }

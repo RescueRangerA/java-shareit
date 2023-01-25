@@ -41,15 +41,11 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        Long userId = null;
+        Long userId;
         try {
             userId = Long.parseLong(accessToken);
-        } catch (NumberFormatException ignored) {
-
-        }
-
-        if (userId == null) {
-            resolver.resolveException(httpRequest, httpResponse, null, new IncorrectAuthHeader(accessToken));
+        } catch (NumberFormatException e) {
+            resolver.resolveException(httpRequest, httpResponse, null, new IncorrectAuthHeader(accessToken, e));
             return;
         }
 
