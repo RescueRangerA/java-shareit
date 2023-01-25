@@ -1,15 +1,41 @@
 package ru.practicum.shareit.item.mapper;
 
+import org.springframework.stereotype.Component;
 import ru.practicum.shareit.item.dto.CreateItemRequestDto;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
 import ru.practicum.shareit.item.dto.UpdateItemRequestDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
-public interface ItemMapper {
-    ItemResponseDto toItemResponseDto(Item item);
+@Component
+public class ItemMapper {
 
-    Item toItem(Long itemId, UpdateItemRequestDto itemRequestDto, User user);
+    public ItemResponseDto toItemResponseDto(Item item) {
+        return new ItemResponseDto(
+                item.getId(),
+                item.getName(),
+                item.getDescription(),
+                item.getAvailable()
+        );
+    }
 
-    Item toItem(CreateItemRequestDto itemRequestDto, User user);
+    public Item toItem(Long itemId, UpdateItemRequestDto itemRequestDto, User user) {
+        return new Item(
+                itemId,
+                itemRequestDto.getName(),
+                itemRequestDto.getDescription(),
+                itemRequestDto.getAvailable(),
+                user
+        );
+    }
+
+    public Item toItem(CreateItemRequestDto itemRequestDto, User user) {
+        return new Item(
+                null,
+                itemRequestDto.getName(),
+                itemRequestDto.getDescription(),
+                itemRequestDto.getAvailable(),
+                user
+        );
+    }
 }
