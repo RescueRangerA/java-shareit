@@ -6,20 +6,22 @@ import ru.practicum.shareit.exceptions.UserEmailDuplication;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Repository
 public class InMemoryUserRepository implements UserRepository {
     private final Map<Long, User> idStorage;
 
-    private final Map<String, User> emailStorage;
+    private final Set<String> emailUniqueStorage;
 
     private final AtomicLong readyIndex;
 
     public InMemoryUserRepository() {
         this.idStorage = new HashMap<>();
-        this.emailStorage = new HashMap<>();
+        this.emailUniqueStorage = new HashSet<>();
         this.readyIndex = new AtomicLong();
     }
 
@@ -28,7 +30,7 @@ public class InMemoryUserRepository implements UserRepository {
         User removedUser = idStorage.remove(id);
 
         if (removedUser != null) {
-            emailStorage.remove(removedUser.getEmail());
+            emailUniqueStorage.remove(removedUser.getEmail());
         }
     }
 
@@ -39,14 +41,14 @@ public class InMemoryUserRepository implements UserRepository {
 
     @Override
     public User save(User user) {
-        if (emailStorage.get(user.getEmail()) != null) {
+        if (emailUniqueStorage.contains(user.getEmail())) {
             throw new UserEmailDuplication();
         }
 
         if (user.getId() == null) {
             user.setId(readyIndex.incrementAndGet());
 
-            emailStorage.put(user.getEmail(), user);
+            emailUniqueStorage.add(user.getEmail());
             idStorage.put(user.getId(), user);
 
             return user;
@@ -62,9 +64,9 @@ public class InMemoryUserRepository implements UserRepository {
             }
 
             if (user.getEmail() != null) {
-                emailStorage.remove(existingUser.getEmail());
+                emailUniqueStorage.remove(existingUser.getEmail());
                 existingUser.setEmail(user.getEmail());
-                emailStorage.put(existingUser.getEmail(), existingUser);
+                emailUniqueStorage.add(existingUser.getEmail());
             }
 
             idStorage.put(existingUser.getId(), existingUser);
