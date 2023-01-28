@@ -1,23 +1,22 @@
-package ru.practicum.shareit.item.model;
+package ru.practicum.shareit.item.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.practicum.shareit.user.model.User;
+import org.springframework.lang.Nullable;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Item {
-    private Long id;
-
+public class UpdateItemRequestDto {
+    @Nullable
     private String name;
 
+    @Nullable
     private String description;
 
+    @Nullable
     private Boolean available;
-
-    private User owner;
 }
