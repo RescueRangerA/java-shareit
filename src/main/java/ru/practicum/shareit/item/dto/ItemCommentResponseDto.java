@@ -1,26 +1,23 @@
 package ru.practicum.shareit.item.dto;
 
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Set;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ItemResponseDto {
+public class ItemCommentResponseDto {
     private Long id;
 
-    private String name;
+    private String text;
 
-    private String description;
+    private String authorName;
 
-    private Boolean available;
-
-    private Long ownerId;
-
-    private Set<ItemCommentResponseDto> comments;
+    private LocalDateTime created;
 }

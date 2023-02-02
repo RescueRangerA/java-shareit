@@ -1,109 +1,185 @@
 package ru.practicum.shareit.item.service;
 
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exceptions.EntityIsNotFoundException;
-import ru.practicum.shareit.item.dto.CreateItemRequestDto;
-import ru.practicum.shareit.item.dto.ItemResponseDto;
-import ru.practicum.shareit.item.dto.UpdateItemRequestDto;
-import ru.practicum.shareit.item.mapper.ItemMapper;
+import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.model.BookingStatus;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.exception.generic.ExtendedEntityNotFoundException;
+import ru.practicum.shareit.item.exception.NotAllowedToAddComments;
+import ru.practicum.shareit.item.dto.*;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.repository.ItemCommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
-import ru.practicum.shareit.security.IAuthenticationFacade;
+import ru.practicum.shareit.mapper.ModelMapper;
+import ru.practicum.shareit.security.user.ExtendedUserDetails;
+import ru.practicum.shareit.security.facade.IAuthenticationFacade;
 import ru.practicum.shareit.user.model.User;
 
-import javax.security.sasl.AuthenticationException;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
 
-    private final ItemMapper itemMapper;
+    private final BookingRepository bookingRepository;
+
+    private final ItemCommentRepository itemCommentRepository;
+
+    private final ModelMapper mapper;
 
     private final IAuthenticationFacade authenticationFacade;
 
-    public ItemServiceImpl(ItemRepository itemRepository, ItemMapper itemMapper, IAuthenticationFacade authenticationFacade) {
+    public ItemServiceImpl(ItemRepository itemRepository, BookingRepository bookingRepository, ItemCommentRepository itemCommentRepository, ModelMapper mapper, IAuthenticationFacade authenticationFacade) {
         this.itemRepository = itemRepository;
-        this.itemMapper = itemMapper;
+        this.bookingRepository = bookingRepository;
+        this.itemCommentRepository = itemCommentRepository;
+        this.mapper = mapper;
         this.authenticationFacade = authenticationFacade;
     }
 
     @Override
-    public List<ItemResponseDto> findAll() {
-        User currentUser = (User) authenticationFacade.getAuthentication().getPrincipal();
+    @Transactional(readOnly = true)
+    public List<ItemResponseWithBookingDto> findAll() {
+        ExtendedUserDetails currentUserDetails = authenticationFacade.getCurrentUserDetails();
+        List<Item> items = itemRepository.findAllAvailableTrueByOwner_Id(currentUserDetails.getId());
 
-        return itemRepository.findAllAvailableForUser(currentUser)
+        return items
                 .stream()
-                .map(itemMapper::toItemResponseDto)
+                .map((item -> mapper.toItemResponseWithBookingDto(
+                        item,
+                        bookingRepository.findByItemAndStartIsBefore(item, LocalDateTime.now()),
+                        bookingRepository.findByItemAndFinishIsAfter(item, LocalDateTime.now())
+                )
+                ))
                 .collect(Collectors.toList());
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ItemResponseDto> findByText(String text) {
         if (text.isEmpty()) {
             return Collections.emptyList();
         }
 
-        return itemRepository.findAllAvailableByNameOrDescriptionContainingCaseInsensitive(text)
+        List<Item> items = itemRepository.findAllAvailableTrueAndNameOrDescriptionLikeIgnoreCase(text);
+
+        return items
                 .stream()
-                .map(itemMapper::toItemResponseDto)
+                .map(mapper::toItemResponseDto)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public ItemResponseDto findOne(Long itemId) throws AuthenticationException {
-        return itemMapper.toItemResponseDto(findOneItemOrThrow(itemId));
+    @Transactional(readOnly = true)
+    public ItemResponseWithBookingDto findOne(Long itemId) {
+        Item item = itemRepository
+                .findById(itemId)
+                .orElseThrow(() -> new ExtendedEntityNotFoundException(Item.class, itemId));
+
+        Optional<Booking> lastBooking = Optional.empty();
+        Optional<Booking> nextBooking = Optional.empty();
+
+        if (canReadBookingsOfItem(item)) {
+            lastBooking = bookingRepository.findByItemAndStartIsBefore(item, LocalDateTime.now());
+            nextBooking = bookingRepository.findByItemAndFinishIsAfter(item, LocalDateTime.now());
+        }
+
+        return mapper.toItemResponseWithBookingDto(item, lastBooking, nextBooking);
     }
 
     @Override
+    @Transactional
     public ItemResponseDto create(CreateItemRequestDto createItemRequestDto) {
-        User currentUser = (User) authenticationFacade.getAuthentication().getPrincipal();
+        User currentUser = authenticationFacade.getCurrentUser();
 
-        return itemMapper.toItemResponseDto(itemRepository.save(itemMapper.toItem(createItemRequestDto, currentUser)));
+        return mapper.toItemResponseDto(itemRepository.save(mapper.toItem(createItemRequestDto, currentUser)));
     }
 
     @Override
-    public ItemResponseDto update(Long itemId, UpdateItemRequestDto updateItemRequestDto) throws AuthenticationException {
-        Item item = findOneItemOrThrow(itemId);
+    @Transactional
+    public ItemResponseDto update(Long itemId, UpdateItemRequestDto updateItemRequestDto) {
+        Item item = itemRepository
+                .findById(itemId)
+                .orElseThrow(() -> new ExtendedEntityNotFoundException(Item.class, itemId));
+
         checkItemOwnershipOrThrow(item);
 
-        return itemMapper.toItemResponseDto(
-                itemRepository.save(
-                        itemMapper.toItem(itemId, updateItemRequestDto, item.getOwner())
-                )
-        );
+        if (updateItemRequestDto.getName() != null) {
+            item.setName(updateItemRequestDto.getName());
+        }
+
+        if (updateItemRequestDto.getDescription() != null) {
+            item.setDescription(updateItemRequestDto.getDescription());
+        }
+
+        if (updateItemRequestDto.getAvailable() != null) {
+            item.setAvailable(updateItemRequestDto.getAvailable());
+        }
+
+        return mapper.toItemResponseDto(item);
     }
 
     @Override
-    public void removeById(Long itemId) throws AuthenticationException {
-        Item item = findOneItemOrThrow(itemId);
+    @Transactional
+    public ItemCommentResponseDto addComment(Long itemId, CreateItemCommentDto createItemCommentDto) {
+        User currentUser = authenticationFacade.getCurrentUser();
+
+        Item item = itemRepository
+                .findById(itemId)
+                .orElseThrow(() -> new ExtendedEntityNotFoundException(Item.class, itemId));
+
+
+        Boolean canAddComment = bookingRepository.existsBookingByBookerAndItemAndFinishIsBeforeAndStatus(
+                currentUser,
+                item,
+                LocalDateTime.now(),
+                BookingStatus.APPROVED
+        );
+
+        if (!canAddComment) {
+            throw new NotAllowedToAddComments(currentUser, item);
+        }
+
+        Comment comment = itemCommentRepository.save(mapper.toItemComment(createItemCommentDto, currentUser, item));
+
+        return mapper.toItemCommentResponseDto(comment);
+    }
+
+    @Override
+    @Transactional
+    public void removeById(Long itemId) {
+        Item item = itemRepository
+                .findById(itemId)
+                .orElseThrow(() -> new ExtendedEntityNotFoundException(Item.class, itemId));
+
         checkItemOwnershipOrThrow(item);
         itemRepository.deleteById(itemId);
     }
 
-    private Item findOneItemOrThrow(Long itemId) {
-        Item item = itemRepository.findOne(itemId);
+    private void checkItemOwnershipOrThrow(Item item) {
+        ExtendedUserDetails currentUserDetails = authenticationFacade.getCurrentUserDetails();
 
-        if (item == null) {
-            throw new EntityIsNotFoundException(Item.class, itemId);
-        }
-
-        return item;
-    }
-
-    private void checkItemOwnershipOrThrow(Item item) throws AuthenticationException {
-        User currentUser = (User) authenticationFacade.getAuthentication().getPrincipal();
-
-        if (!item.getOwner().getId().equals(currentUser.getId())) {
-            throw new AuthenticationException(
+        if (!item.getOwner().getId().equals(currentUserDetails.getId())) {
+            throw new AccessDeniedException(
                     String.format(
                             "User with id '%d' tried to update item with id '%d'. Rejected.",
-                            currentUser.getId(),
+                            currentUserDetails.getId(),
                             item.getOwner().getId()
                     )
             );
         }
+    }
+
+    private Boolean canReadBookingsOfItem(Item item) {
+        ExtendedUserDetails currentUserDetails = authenticationFacade.getCurrentUserDetails();
+
+        return item.getOwner().getId().equals(currentUserDetails.getId());
     }
 }

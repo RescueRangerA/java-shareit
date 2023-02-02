@@ -1,8 +1,10 @@
 package ru.practicum.shareit.user.service;
 
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exceptions.EntityIsNotFoundException;
-import ru.practicum.shareit.user.mapper.UserMapper;
+import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.exception.generic.ExtendedEntityNotFoundException;
+import ru.practicum.shareit.mapper.ModelMapper;
 import ru.practicum.shareit.user.dto.CreateUserRequestDto;
 import ru.practicum.shareit.user.dto.UpdateUserRequestDto;
 import ru.practicum.shareit.user.dto.UserResponseDto;
@@ -17,44 +19,63 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
-    private final UserMapper userMapper;
+    private final ModelMapper mapper;
 
-    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper) {
+    public UserServiceImpl(UserRepository userRepository, ModelMapper mapper) {
         this.userRepository = userRepository;
-        this.userMapper = userMapper;
+        this.mapper = mapper;
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<UserResponseDto> findAll() {
         return userRepository.findAll()
                 .stream()
-                .map(userMapper::toUserResponseDto)
+                .map(mapper::toUserResponseDto)
                 .collect(Collectors.toList());
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserResponseDto findOne(Long userId) {
-        User user = userRepository.findOne(userId);
+        return mapper.toUserResponseDto(
+                userRepository
+                        .findById(userId)
+                        .orElseThrow(() -> new ExtendedEntityNotFoundException(User.class, userId))
+        );
+    }
 
-        if (user == null) {
-            throw new EntityIsNotFoundException(User.class, userId);
+    @Override
+    @Transactional
+    public UserResponseDto create(CreateUserRequestDto createUserRequestDto) {
+        return mapper.toUserResponseDto(userRepository.save(mapper.toUser(createUserRequestDto)));
+    }
+
+    @Override
+    @Transactional
+    public UserResponseDto update(Long userId, UpdateUserRequestDto updateUserRequestDto) {
+        User user = userRepository
+                .findById(userId)
+                .orElseThrow(() -> new ExtendedEntityNotFoundException(User.class, userId));
+
+        if (updateUserRequestDto.getName() != null) {
+            user.setUsername(updateUserRequestDto.getName());
         }
 
-        return userMapper.toUserResponseDto(user);
+        if (updateUserRequestDto.getEmail() != null) {
+            user.setEmail(updateUserRequestDto.getEmail());
+        }
+
+        return mapper.toUserResponseDto(user);
     }
 
     @Override
-    public UserResponseDto create(CreateUserRequestDto createUserRequestDto) {
-        return userMapper.toUserResponseDto(userRepository.save(userMapper.toUser(createUserRequestDto)));
-    }
-
-    @Override
-    public UserResponseDto update(Long userId, UpdateUserRequestDto updateUserRequestDto) {
-        return userMapper.toUserResponseDto(userRepository.save(userMapper.toUser(userId, updateUserRequestDto)));
-    }
-
-    @Override
+    @Transactional
     public void removeById(Long userId) {
-        userRepository.deleteById(userId);
+        try {
+            userRepository.deleteById(userId);
+        } catch (EmptyResultDataAccessException exception) {
+            throw new ExtendedEntityNotFoundException(User.class, userId);
+        }
     }
 }

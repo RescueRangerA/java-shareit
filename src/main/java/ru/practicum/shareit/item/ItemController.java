@@ -1,12 +1,9 @@
 package ru.practicum.shareit.item;
 
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.item.dto.CreateItemRequestDto;
-import ru.practicum.shareit.item.dto.ItemResponseDto;
-import ru.practicum.shareit.item.dto.UpdateItemRequestDto;
+import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.service.ItemService;
 
-import javax.security.sasl.AuthenticationException;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
@@ -22,7 +19,7 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemResponseDto> getAllItems() {
+    public List<ItemResponseWithBookingDto> getAllItems() {
         return itemService.findAll();
     }
 
@@ -32,7 +29,7 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemResponseDto getItem(@PathVariable @Positive Long itemId) throws AuthenticationException {
+    public ItemResponseWithBookingDto getItem(@PathVariable @Positive Long itemId) {
         return itemService.findOne(itemId);
     }
 
@@ -42,12 +39,17 @@ public class ItemController {
     }
 
     @PatchMapping("/{itemId}")
-    public ItemResponseDto updateItem(@PathVariable @Positive Long itemId, @Valid @RequestBody UpdateItemRequestDto updateItemRequestDto) throws AuthenticationException {
+    public ItemResponseDto updateItem(@PathVariable @Positive Long itemId, @Valid @RequestBody UpdateItemRequestDto updateItemRequestDto) {
         return itemService.update(itemId, updateItemRequestDto);
     }
 
     @DeleteMapping("/{itemId}")
-    public void deleteItem(@PathVariable @Positive Long itemId) throws AuthenticationException {
+    public void deleteItem(@PathVariable @Positive Long itemId) {
         itemService.removeById(itemId);
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public ItemCommentResponseDto addComment(@PathVariable @Positive Long itemId, @Valid @RequestBody CreateItemCommentDto createItemCommentDto) {
+        return itemService.addComment(itemId, createItemCommentDto);
     }
 }

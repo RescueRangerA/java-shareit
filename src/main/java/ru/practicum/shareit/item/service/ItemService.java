@@ -1,22 +1,21 @@
 package ru.practicum.shareit.item.service;
 
-import ru.practicum.shareit.item.dto.CreateItemRequestDto;
-import ru.practicum.shareit.item.dto.ItemResponseDto;
-import ru.practicum.shareit.item.dto.UpdateItemRequestDto;
+import ru.practicum.shareit.item.dto.*;
 
-import javax.security.sasl.AuthenticationException;
 import java.util.List;
 
 public interface ItemService {
-    List<ItemResponseDto> findAll();
+    List<ItemResponseWithBookingDto> findAll();
 
     List<ItemResponseDto> findByText(String text);
 
-    ItemResponseDto findOne(Long itemId) throws AuthenticationException;
+    ItemResponseWithBookingDto findOne(Long itemId);
 
     ItemResponseDto create(CreateItemRequestDto createItemRequestDto);
 
-    ItemResponseDto update(Long itemId, UpdateItemRequestDto updateItemRequestDto) throws AuthenticationException;
+    ItemResponseDto update(Long itemId, UpdateItemRequestDto updateItemRequestDto);
 
-    void removeById(Long itemId) throws AuthenticationException;
+    ItemCommentResponseDto addComment(Long itemId, CreateItemCommentDto createItemCommentDto);
+
+    void removeById(Long itemId);
 }

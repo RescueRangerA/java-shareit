@@ -1,4 +1,4 @@
-package ru.practicum.shareit.validation;
+package ru.practicum.shareit.validation.email;
 
 import javax.validation.Constraint;
 import javax.validation.Payload;
@@ -18,7 +18,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = {})
-@Pattern(regexp = Constants.PATTERN, flags = Pattern.Flag.CASE_INSENSITIVE)
+@Pattern(regexp = ExtendedEmailValidatorConstants.PATTERN, flags = Pattern.Flag.CASE_INSENSITIVE)
 public @interface ExtendedEmailValidator {
     String message() default "{javax.validation.constraints.Email.message}";
 

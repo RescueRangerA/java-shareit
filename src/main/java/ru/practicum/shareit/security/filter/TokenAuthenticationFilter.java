@@ -1,13 +1,14 @@
-package ru.practicum.shareit.security;
+package ru.practicum.shareit.security.filter;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
-import ru.practicum.shareit.exceptions.EntityIsNotFoundException;
-import ru.practicum.shareit.exceptions.IncorrectAuthHeader;
-import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.repository.UserRepository;
+import ru.practicum.shareit.exception.generic.ExtendedEntityNotFoundException;
+import ru.practicum.shareit.security.exception.IncorrectAuthHeader;
+import ru.practicum.shareit.security.user.ExtendedUserDetails;
+import ru.practicum.shareit.security.service.ExtendedUserDetailsService;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -19,16 +20,17 @@ import java.util.Collections;
 public class TokenAuthenticationFilter extends OncePerRequestFilter {
     private static final String HEADER_NAME = "X-Sharer-User-Id";
 
-    private final UserRepository userRepository;
+    private final ExtendedUserDetailsService userDetailsService;
 
     private final HandlerExceptionResolver resolver;
 
-    public TokenAuthenticationFilter(UserRepository userRepository, HandlerExceptionResolver resolver) {
-        this.userRepository = userRepository;
+    public TokenAuthenticationFilter(ExtendedUserDetailsService userDetailsService, HandlerExceptionResolver resolver) {
+        this.userDetailsService = userDetailsService;
         this.resolver = resolver;
     }
 
     @Override
+    @Transactional
     protected void doFilterInternal(
             HttpServletRequest httpRequest,
             HttpServletResponse httpResponse,
@@ -49,15 +51,17 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        User user = userRepository.findOne(userId);
-        if (user == null) {
-            resolver.resolveException(httpRequest, httpResponse, null, new EntityIsNotFoundException(User.class, userId));
+        ExtendedUserDetails user;
+        try {
+            user = userDetailsService.loadUserById(userId);
+        } catch (ExtendedEntityNotFoundException e) {
+            resolver.resolveException(httpRequest, httpResponse, null, e);
             return;
         }
 
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                 user,
-                "",
+                user.getPassword(),
                 Collections.emptyList()
         );
         SecurityContextHolder.getContext().setAuthentication(authentication);

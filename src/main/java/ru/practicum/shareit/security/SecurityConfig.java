@@ -12,7 +12,8 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
-import ru.practicum.shareit.user.repository.UserRepository;
+import ru.practicum.shareit.security.filter.TokenAuthenticationFilter;
+import ru.practicum.shareit.security.service.ExtendedUserDetailsService;
 
 
 @Configuration
@@ -22,13 +23,13 @@ import ru.practicum.shareit.user.repository.UserRepository;
         securedEnabled = true
 )
 public class SecurityConfig {
-    private final UserRepository userRepository;
+    private final ExtendedUserDetailsService userDetailsService;
 
     private final HandlerExceptionResolver resolver;
 
     @Autowired
-    public SecurityConfig(UserRepository userRepository, @Qualifier("handlerExceptionResolver") HandlerExceptionResolver resolver) {
-        this.userRepository = userRepository;
+    public SecurityConfig(ExtendedUserDetailsService userDetailsService, @Qualifier("handlerExceptionResolver") HandlerExceptionResolver resolver) {
+        this.userDetailsService = userDetailsService;
         this.resolver = resolver;
     }
 
@@ -48,7 +49,7 @@ public class SecurityConfig {
 
                 .and()
 
-                .addFilterAt(new TokenAuthenticationFilter(userRepository, resolver), BasicAuthenticationFilter.class);
+                .addFilterAfter(new TokenAuthenticationFilter(userDetailsService, resolver), BasicAuthenticationFilter.class);
 
         return http.build();
     }
