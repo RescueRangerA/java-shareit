@@ -15,7 +15,6 @@ import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -99,8 +98,7 @@ public class ModelMapper {
         return new User(
                 null,
                 user.getName(),
-                user.getEmail(),
-                new HashSet<>()
+                user.getEmail()
         );
     }
 

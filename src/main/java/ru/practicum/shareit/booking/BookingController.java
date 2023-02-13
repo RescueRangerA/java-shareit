@@ -26,7 +26,7 @@ public class BookingController {
     }
 
     @PatchMapping("/{bookingId}")
-    public ResponseBookingDto create(@PathVariable @Positive Long bookingId, @RequestParam Boolean approved) {
+    public ResponseBookingDto updateBookingStatus(@PathVariable @Positive Long bookingId, @RequestParam Boolean approved) {
         BookingStatus newStatus = approved ? BookingStatus.APPROVED : BookingStatus.REJECTED;
 
         return this.bookingService.updateStatus(bookingId, newStatus);

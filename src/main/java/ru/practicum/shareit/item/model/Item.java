@@ -31,5 +31,5 @@ public class Item {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name = "item_id")
-    Set<Comment> comments;
+    private Set<Comment> comments;
 }

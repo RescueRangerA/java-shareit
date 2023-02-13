@@ -13,6 +13,7 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemCommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.item.repository.ItemWithBookingProjection;
 import ru.practicum.shareit.mapper.ModelMapper;
 import ru.practicum.shareit.security.user.ExtendedUserDetails;
 import ru.practicum.shareit.security.facade.IAuthenticationFacade;
@@ -48,16 +49,19 @@ public class ItemServiceImpl implements ItemService {
     @Transactional(readOnly = true)
     public List<ItemResponseWithBookingDto> findAll() {
         ExtendedUserDetails currentUserDetails = authenticationFacade.getCurrentUserDetails();
-        List<Item> items = itemRepository.findAllAvailableTrueByOwner_Id(currentUserDetails.getId());
+        List<ItemWithBookingProjection> items = itemRepository.findAllAvailableTrueByOwner_IdWithClosestBookings(
+                currentUserDetails.getId(),
+                LocalDateTime.now()
+        );
 
         return items
                 .stream()
-                .map((item -> mapper.toItemResponseWithBookingDto(
-                        item,
-                        bookingRepository.findByItemAndStartIsBefore(item, LocalDateTime.now()),
-                        bookingRepository.findByItemAndFinishIsAfter(item, LocalDateTime.now())
+                .map(item -> mapper.toItemResponseWithBookingDto(
+                                item.getItem(),
+                                Optional.ofNullable(item.getLastBooking()),
+                                Optional.ofNullable(item.getNextBooking())
+                        )
                 )
-                ))
                 .collect(Collectors.toList());
     }
 

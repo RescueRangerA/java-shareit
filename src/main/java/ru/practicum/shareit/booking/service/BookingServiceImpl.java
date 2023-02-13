@@ -100,39 +100,48 @@ public class BookingServiceImpl implements BookingService {
     public List<ResponseBookingDto> findAllBookedByCurrentUserByStatusOrderByDateDesc(SearchBookingStatus status) {
         ExtendedUserDetails currentUserDetails = authenticationFacade.getCurrentUserDetails();
 
-        List<Booking> bookings = new ArrayList<>();
+        List<Booking> bookings;
 
-        if (status.equals(SearchBookingStatus.ALL)) {
-            bookings = bookingRepository.findAllByBooker_IdOrderByStartDesc(currentUserDetails.getId());
-        } else if (status.equals(SearchBookingStatus.CURRENT)) {
-            bookings = bookingRepository.findByBooker_IdAndStartIsBeforeAndFinishIsAfter(
-                    currentUserDetails.getId(),
-                    LocalDateTime.now(),
-                    LocalDateTime.now(),
-                    Sort.by(new Sort.Order(Sort.Direction.DESC, "start"))
-            );
-        } else if (status.equals(SearchBookingStatus.PAST)) {
-            bookings = bookingRepository.findByBooker_IdAndFinishIsBefore(
-                    currentUserDetails.getId(),
-                    LocalDateTime.now(),
-                    Sort.by(new Sort.Order(Sort.Direction.DESC, "start"))
-            );
-        } else if (status.equals(SearchBookingStatus.FUTURE)) {
-            bookings = bookingRepository.findByBooker_IdAndStartIsAfter(
-                    currentUserDetails.getId(),
-                    LocalDateTime.now(),
-                    Sort.by(new Sort.Order(Sort.Direction.DESC, "start"))
-            );
-        } else if (status.equals(SearchBookingStatus.WAITING)) {
-            bookings = bookingRepository.findAllByBooker_IdAndStatusOrderByStart(
-                    currentUserDetails.getId(),
-                    BookingStatus.WAITING
-            );
-        } else if (status.equals(SearchBookingStatus.REJECTED)) {
-            bookings = bookingRepository.findAllByBooker_IdAndStatusOrderByStart(
-                    currentUserDetails.getId(),
-                    BookingStatus.REJECTED
-            );
+        switch (status) {
+            case ALL:
+                bookings = bookingRepository.findAllByBooker_IdOrderByStartDesc(currentUserDetails.getId());
+                break;
+            case CURRENT:
+                bookings = bookingRepository.findByBooker_IdAndStartIsBeforeAndFinishIsAfter(
+                        currentUserDetails.getId(),
+                        LocalDateTime.now(),
+                        LocalDateTime.now(),
+                        Sort.by(new Sort.Order(Sort.Direction.DESC, "start"))
+                );
+                break;
+            case PAST:
+                bookings = bookingRepository.findByBooker_IdAndFinishIsBefore(
+                        currentUserDetails.getId(),
+                        LocalDateTime.now(),
+                        Sort.by(new Sort.Order(Sort.Direction.DESC, "start"))
+                );
+                break;
+            case FUTURE:
+                bookings = bookingRepository.findByBooker_IdAndStartIsAfter(
+                        currentUserDetails.getId(),
+                        LocalDateTime.now(),
+                        Sort.by(new Sort.Order(Sort.Direction.DESC, "start"))
+                );
+                break;
+            case WAITING:
+                bookings = bookingRepository.findAllByBooker_IdAndStatusOrderByStart(
+                        currentUserDetails.getId(),
+                        BookingStatus.WAITING
+                );
+                break;
+            case REJECTED:
+                bookings = bookingRepository.findAllByBooker_IdAndStatusOrderByStart(
+                        currentUserDetails.getId(),
+                        BookingStatus.REJECTED
+                );
+                break;
+            default:
+                bookings = new ArrayList<>();
         }
 
         return bookings
@@ -144,35 +153,45 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional(readOnly = true)
     public List<ResponseBookingDto> findAllForCurrentUserItemsByStatusOrderByDateDesc(SearchBookingStatus status) {
-        User currentUser = authenticationFacade.getCurrentUser();
+        ExtendedUserDetails userDetails = authenticationFacade.getCurrentUserDetails();
+        List<Item> items = itemRepository.findAllByOwner_Id(userDetails.getId());
 
-        List<Booking> bookings = new ArrayList<>();
+        List<Booking> bookings;
 
-        if (status.equals(SearchBookingStatus.ALL)) {
-            bookings = bookingRepository.findAllByItemInOrderByStartDesc(currentUser.getItems());
-        } else if (status.equals(SearchBookingStatus.CURRENT)) {
-            bookings = bookingRepository.findByItemInAndStartIsBeforeAndFinishIsAfter(
-                    currentUser.getItems(),
-                    LocalDateTime.now(),
-                    LocalDateTime.now(),
-                    Sort.by(new Sort.Order(Sort.Direction.DESC, "start"))
-            );
-        } else if (status.equals(SearchBookingStatus.PAST)) {
-            bookings = bookingRepository.findByItemInAndFinishIsBefore(
-                    currentUser.getItems(),
-                    LocalDateTime.now(),
-                    Sort.by(new Sort.Order(Sort.Direction.DESC, "start"))
-            );
-        } else if (status.equals(SearchBookingStatus.FUTURE)) {
-            bookings = bookingRepository.findByItemInAndStartIsAfter(
-                    currentUser.getItems(),
-                    LocalDateTime.now(),
-                    Sort.by(new Sort.Order(Sort.Direction.DESC, "start"))
-            );
-        } else if (status.equals(SearchBookingStatus.WAITING)) {
-            bookings = bookingRepository.findAllByItemInAndStatusOrderByStart(currentUser.getItems(), BookingStatus.WAITING);
-        } else if (status.equals(SearchBookingStatus.REJECTED)) {
-            bookings = bookingRepository.findAllByItemInAndStatusOrderByStart(currentUser.getItems(), BookingStatus.REJECTED);
+        switch (status) {
+            case ALL:
+                bookings = bookingRepository.findAllByItemInOrderByStartDesc(items);
+                break;
+            case CURRENT:
+                bookings = bookingRepository.findByItemInAndStartIsBeforeAndFinishIsAfter(
+                        items,
+                        LocalDateTime.now(),
+                        LocalDateTime.now(),
+                        Sort.by(new Sort.Order(Sort.Direction.DESC, "start"))
+                );
+                break;
+            case PAST:
+                bookings = bookingRepository.findByItemInAndFinishIsBefore(
+                        items,
+                        LocalDateTime.now(),
+                        Sort.by(new Sort.Order(Sort.Direction.DESC, "start"))
+                );
+                break;
+            case FUTURE:
+                bookings = bookingRepository.findByItemInAndStartIsAfter(
+                        items,
+                        LocalDateTime.now(),
+                        Sort.by(new Sort.Order(Sort.Direction.DESC, "start"))
+                );
+                break;
+            case WAITING:
+                bookings = bookingRepository.findAllByItemInAndStatusOrderByStart(items, BookingStatus.WAITING);
+                break;
+            case REJECTED:
+                bookings = bookingRepository.findAllByItemInAndStatusOrderByStart(items, BookingStatus.REJECTED);
+                break;
+            default:
+                bookings = new ArrayList<>();
         }
 
         return bookings
