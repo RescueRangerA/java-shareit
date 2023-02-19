@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.lang.Nullable;
-import ru.practicum.shareit.validation.ExtendedEmailValidator;
+import ru.practicum.shareit.validation.email.ExtendedEmailValidator;
 
 @Getter
 @Setter
