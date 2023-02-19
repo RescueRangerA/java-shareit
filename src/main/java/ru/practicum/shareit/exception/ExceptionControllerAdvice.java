@@ -20,6 +20,7 @@ import ru.practicum.shareit.security.exception.IncorrectAuthHeader;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.ConstraintViolationException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,7 +36,7 @@ public class ExceptionControllerAdvice {
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler({ImmutableBookingStatus.class, IncorrectAuthHeader.class, ItemIsUnavailable.class, NotAllowedToAddComments.class})
+    @ExceptionHandler({ImmutableBookingStatus.class, IncorrectAuthHeader.class, ItemIsUnavailable.class, NotAllowedToAddComments.class, ConstraintViolationException.class})
     public void handleBadRequest(final Exception e, HttpServletResponse response) throws IOException {
         logIfNeeded(e);
         response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());

@@ -11,6 +11,7 @@ import ru.practicum.shareit.validation.compareDate.CompareDate;
 
 import javax.validation.constraints.Future;
 import javax.validation.constraints.FutureOrPresent;
+import javax.validation.constraints.Positive;
 import java.time.LocalDateTime;
 
 @Getter
@@ -29,5 +30,6 @@ public class CreateBookingDto {
     @Future
     private LocalDateTime end;
 
+    @Positive
     private Long itemId;
 }

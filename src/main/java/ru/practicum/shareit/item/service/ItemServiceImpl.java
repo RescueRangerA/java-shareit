@@ -7,6 +7,7 @@ import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.generic.ExtendedEntityNotFoundException;
+import ru.practicum.shareit.extension.CustomPageableParameters;
 import ru.practicum.shareit.item.exception.NotAllowedToAddComments;
 import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.model.Comment;
@@ -15,6 +16,8 @@ import ru.practicum.shareit.item.repository.ItemCommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.repository.ItemWithBookingProjection;
 import ru.practicum.shareit.mapper.ModelMapper;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.security.user.ExtendedUserDetails;
 import ru.practicum.shareit.security.facade.IAuthenticationFacade;
 import ru.practicum.shareit.user.model.User;
@@ -33,25 +36,30 @@ public class ItemServiceImpl implements ItemService {
 
     private final ItemCommentRepository itemCommentRepository;
 
+    private final ItemRequestRepository itemRequestRepository;
+
     private final ModelMapper mapper;
 
     private final IAuthenticationFacade authenticationFacade;
 
-    public ItemServiceImpl(ItemRepository itemRepository, BookingRepository bookingRepository, ItemCommentRepository itemCommentRepository, ModelMapper mapper, IAuthenticationFacade authenticationFacade) {
+    public ItemServiceImpl(ItemRepository itemRepository, BookingRepository bookingRepository, ItemCommentRepository itemCommentRepository, ItemRequestRepository itemRequestRepository, ModelMapper mapper, IAuthenticationFacade authenticationFacade) {
         this.itemRepository = itemRepository;
         this.bookingRepository = bookingRepository;
         this.itemCommentRepository = itemCommentRepository;
+        this.itemRequestRepository = itemRequestRepository;
         this.mapper = mapper;
         this.authenticationFacade = authenticationFacade;
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<ItemResponseWithBookingDto> findAll() {
+    public List<ItemResponseWithBookingDto> findAll(CustomPageableParameters customPageableParameters) {
         ExtendedUserDetails currentUserDetails = authenticationFacade.getCurrentUserDetails();
+
         List<ItemWithBookingProjection> items = itemRepository.findAllAvailableTrueByOwner_IdWithClosestBookings(
                 currentUserDetails.getId(),
-                LocalDateTime.now()
+                LocalDateTime.now(),
+                customPageableParameters.toPageable()
         );
 
         return items
@@ -67,12 +75,15 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ItemResponseDto> findByText(String text) {
+    public List<ItemResponseDto> findByText(String text, CustomPageableParameters customPageableParameters) {
         if (text.isEmpty()) {
             return Collections.emptyList();
         }
 
-        List<Item> items = itemRepository.findAllAvailableTrueAndNameOrDescriptionLikeIgnoreCase(text);
+        List<Item> items = itemRepository.findAllAvailableTrueAndNameOrDescriptionLikeIgnoreCase(
+                text,
+                customPageableParameters.toPageable()
+        );
 
         return items
                 .stream()
@@ -103,7 +114,11 @@ public class ItemServiceImpl implements ItemService {
     public ItemResponseDto create(CreateItemRequestDto createItemRequestDto) {
         User currentUser = authenticationFacade.getCurrentUser();
 
-        return mapper.toItemResponseDto(itemRepository.save(mapper.toItem(createItemRequestDto, currentUser)));
+        Optional<ItemRequest> itemRequest = createItemRequestDto.getRequestId() != null
+                ? itemRequestRepository.findById(createItemRequestDto.getRequestId())
+                : Optional.empty();
+
+        return mapper.toItemResponseDto(itemRepository.save(mapper.toItem(createItemRequestDto, currentUser, itemRequest)));
     }
 
     @Override
