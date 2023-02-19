@@ -23,6 +23,7 @@ import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -141,7 +142,7 @@ public class BookingServiceImpl implements BookingService {
                 );
                 break;
             default:
-                bookings = new ArrayList<>();
+                bookings = Collections.emptyList();
         }
 
         return bookings
