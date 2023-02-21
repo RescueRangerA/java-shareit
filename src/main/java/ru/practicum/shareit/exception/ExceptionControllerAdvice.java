@@ -29,7 +29,7 @@ import java.util.Map;
 @Slf4j
 public class ExceptionControllerAdvice {
     @ExceptionHandler
-    public ResponseEntity<Map<String, Object>> handleConflict(MethodArgumentTypeMismatchException ex) {
+    public ResponseEntity<Map<String, Object>> handleEnumTypeMismatch(MethodArgumentTypeMismatchException ex) {
         Map<String, Object> body = new HashMap<>();
         body.put("error", String.format("Unknown %s: %s", ex.getName(), ex.getValue()));
 
