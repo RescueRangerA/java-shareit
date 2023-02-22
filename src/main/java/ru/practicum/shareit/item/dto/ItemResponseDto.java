@@ -9,6 +9,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
+@EqualsAndHashCode
 public class ItemResponseDto {
     private Long id;
 

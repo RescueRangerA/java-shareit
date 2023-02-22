@@ -23,8 +23,8 @@ public class ItemController {
 
     @GetMapping
     public List<ItemResponseWithBookingDto> getAllItems(
-            @RequestParam(required = false) @PositiveOrZero Long from,
-            @RequestParam(required = false) @Positive Integer size
+            @RequestParam(required = false, defaultValue = "0") @PositiveOrZero Long from,
+            @RequestParam(required = false, defaultValue = "10") @Positive Integer size
     ) {
         return itemService.findAll(CustomPageableParameters.of(from, size));
     }
@@ -32,8 +32,8 @@ public class ItemController {
     @GetMapping("/search")
     public List<ItemResponseDto> findByText(
             @RequestParam String text,
-            @RequestParam(required = false) @PositiveOrZero Long from,
-            @RequestParam(required = false) @Positive Integer size
+            @RequestParam(required = false, defaultValue = "0") @PositiveOrZero Long from,
+            @RequestParam(required = false, defaultValue = "10") @Positive Integer size
     ) {
         return itemService.findByText(text, CustomPageableParameters.of(from, size));
     }

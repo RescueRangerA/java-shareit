@@ -38,8 +38,8 @@ class CompareDateValidatorTest {
         when(compareDate.before()).thenReturn("before");
         when(compareDate.after()).thenReturn("after");
 
-        this.validator = new CompareDateValidator();
-        this.validator.initialize(compareDate);
+        validator = new CompareDateValidator();
+        validator.initialize(compareDate);
 
         context = mock(ConstraintValidatorContext.class);
     }

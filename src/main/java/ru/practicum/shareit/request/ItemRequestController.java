@@ -38,8 +38,8 @@ public class ItemRequestController {
 
     @GetMapping("/all")
     public List<ItemRequestWithItemsResponseDto> findAllForOtherUsers(
-            @RequestParam(required = false) @PositiveOrZero Long from,
-            @RequestParam(required = false) @Positive Integer size
+            @RequestParam(required = false, defaultValue = "0") @PositiveOrZero Long from,
+            @RequestParam(required = false, defaultValue = "10") @Positive Integer size
     ) {
         return itemRequestService.findAllCreatedByOthers(CustomPageableParameters.of(from, size));
     }

@@ -108,94 +108,46 @@ public class BookingServiceImpl implements BookingService {
 
         switch (status) {
             case ALL:
-                if (customPageableParameters.isCompleted()) {
-                    bookings = bookingRepository.findAllByBooker_Id(
-                            currentUserDetails.getId(),
-                            customPageableParameters.toPageable(sortByStartDesc)
-                    );
-                } else {
-                    bookings = bookingRepository.findAllByBooker_Id(
-                            currentUserDetails.getId(),
-                            sortByStartDesc
-                    );
-                }
+                bookings = bookingRepository.findAllByBooker_Id(
+                        currentUserDetails.getId(),
+                        customPageableParameters.toPageable(sortByStartDesc)
+                );
                 break;
             case CURRENT:
-                if (customPageableParameters.isCompleted()) {
-                    bookings = bookingRepository.findByBooker_IdAndStartIsBeforeAndFinishIsAfter(
-                            currentUserDetails.getId(),
-                            LocalDateTime.now(),
-                            LocalDateTime.now(),
-                            customPageableParameters.toPageable(sortByStartDesc)
-                    );
-                } else {
-                    bookings = bookingRepository.findByBooker_IdAndStartIsBeforeAndFinishIsAfter(
-                            currentUserDetails.getId(),
-                            LocalDateTime.now(),
-                            LocalDateTime.now(),
-                            sortByStartDesc
-                    );
-                }
+                bookings = bookingRepository.findByBooker_IdAndStartIsBeforeAndFinishIsAfter(
+                        currentUserDetails.getId(),
+                        LocalDateTime.now(),
+                        LocalDateTime.now(),
+                        customPageableParameters.toPageable(sortByStartDesc)
+                );
                 break;
             case PAST:
-                if (customPageableParameters.isCompleted()) {
-                    bookings = bookingRepository.findByBooker_IdAndFinishIsBefore(
-                            currentUserDetails.getId(),
-                            LocalDateTime.now(),
-                            customPageableParameters.toPageable(sortByStartDesc)
-                    );
-                } else {
-                    bookings = bookingRepository.findByBooker_IdAndFinishIsBefore(
-                            currentUserDetails.getId(),
-                            LocalDateTime.now(),
-                            sortByStartDesc
-                    );
-                }
+                bookings = bookingRepository.findByBooker_IdAndFinishIsBefore(
+                        currentUserDetails.getId(),
+                        LocalDateTime.now(),
+                        customPageableParameters.toPageable(sortByStartDesc)
+                );
                 break;
             case FUTURE:
-                if (customPageableParameters.isCompleted()) {
-                    bookings = bookingRepository.findByBooker_IdAndStartIsAfter(
-                            currentUserDetails.getId(),
-                            LocalDateTime.now(),
-                            customPageableParameters.toPageable(sortByStartDesc)
-                    );
-                } else {
-                    bookings = bookingRepository.findByBooker_IdAndStartIsAfter(
-                            currentUserDetails.getId(),
-                            LocalDateTime.now(),
-                            sortByStartDesc
-                    );
-                }
+                bookings = bookingRepository.findByBooker_IdAndStartIsAfter(
+                        currentUserDetails.getId(),
+                        LocalDateTime.now(),
+                        customPageableParameters.toPageable(sortByStartDesc)
+                );
                 break;
             case WAITING:
-                if (customPageableParameters.isCompleted()) {
-                    bookings = bookingRepository.findAllByBooker_IdAndStatus(
-                            currentUserDetails.getId(),
-                            BookingStatus.WAITING,
-                            customPageableParameters.toPageable(sortByStartDesc)
-                    );
-                } else {
-                    bookings = bookingRepository.findAllByBooker_IdAndStatus(
-                            currentUserDetails.getId(),
-                            BookingStatus.WAITING,
-                            sortByStartDesc
-                    );
-                }
+                bookings = bookingRepository.findAllByBooker_IdAndStatus(
+                        currentUserDetails.getId(),
+                        BookingStatus.WAITING,
+                        customPageableParameters.toPageable(sortByStartDesc)
+                );
                 break;
             case REJECTED:
-                if (customPageableParameters.isCompleted()) {
-                    bookings = bookingRepository.findAllByBooker_IdAndStatus(
-                            currentUserDetails.getId(),
-                            BookingStatus.REJECTED,
-                            customPageableParameters.toPageable(sortByStartDesc)
-                    );
-                } else {
-                    bookings = bookingRepository.findAllByBooker_IdAndStatus(
-                            currentUserDetails.getId(),
-                            BookingStatus.REJECTED,
-                            sortByStartDesc
-                    );
-                }
+                bookings = bookingRepository.findAllByBooker_IdAndStatus(
+                        currentUserDetails.getId(),
+                        BookingStatus.REJECTED,
+                        customPageableParameters.toPageable(sortByStartDesc)
+                );
                 break;
         }
 
@@ -218,94 +170,46 @@ public class BookingServiceImpl implements BookingService {
 
         switch (status) {
             case ALL:
-                if (customPageableParameters.isCompleted()) {
-                    bookings = bookingRepository.findAllByItemIn(
-                            items,
-                            customPageableParameters.toPageable(sortByStartDesc)
-                    );
-                } else {
-                    bookings = bookingRepository.findAllByItemIn(
-                            items,
-                            sortByStartDesc
-                    );
-                }
+                bookings = bookingRepository.findAllByItemIn(
+                        items,
+                        customPageableParameters.toPageable(sortByStartDesc)
+                );
                 break;
             case CURRENT:
-                if (customPageableParameters.isCompleted()) {
-                    bookings = bookingRepository.findByItemInAndStartIsBeforeAndFinishIsAfter(
-                            items,
-                            LocalDateTime.now(),
-                            LocalDateTime.now(),
-                            customPageableParameters.toPageable(sortByStartDesc)
-                    );
-                } else {
-                    bookings = bookingRepository.findByItemInAndStartIsBeforeAndFinishIsAfter(
-                            items,
-                            LocalDateTime.now(),
-                            LocalDateTime.now(),
-                            sortByStartDesc
-                    );
-                }
+                bookings = bookingRepository.findByItemInAndStartIsBeforeAndFinishIsAfter(
+                        items,
+                        LocalDateTime.now(),
+                        LocalDateTime.now(),
+                        customPageableParameters.toPageable(sortByStartDesc)
+                );
                 break;
             case PAST:
-                if (customPageableParameters.isCompleted()) {
-                    bookings = bookingRepository.findByItemInAndFinishIsBefore(
-                            items,
-                            LocalDateTime.now(),
-                            customPageableParameters.toPageable(sortByStartDesc)
-                    );
-                } else {
-                    bookings = bookingRepository.findByItemInAndFinishIsBefore(
-                            items,
-                            LocalDateTime.now(),
-                            sortByStartDesc
-                    );
-                }
+                bookings = bookingRepository.findByItemInAndFinishIsBefore(
+                        items,
+                        LocalDateTime.now(),
+                        customPageableParameters.toPageable(sortByStartDesc)
+                );
                 break;
             case FUTURE:
-                if (customPageableParameters.isCompleted()) {
-                    bookings = bookingRepository.findByItemInAndStartIsAfter(
-                            items,
-                            LocalDateTime.now(),
-                            customPageableParameters.toPageable(sortByStartDesc)
-                    );
-                } else {
-                    bookings = bookingRepository.findByItemInAndStartIsAfter(
-                            items,
-                            LocalDateTime.now(),
-                            sortByStartDesc
-                    );
-                }
+                bookings = bookingRepository.findByItemInAndStartIsAfter(
+                        items,
+                        LocalDateTime.now(),
+                        customPageableParameters.toPageable(sortByStartDesc)
+                );
                 break;
             case WAITING:
-                if (customPageableParameters.isCompleted()) {
-                    bookings = bookingRepository.findAllByItemInAndStatus(
-                            items,
-                            BookingStatus.WAITING,
-                            customPageableParameters.toPageable(sortByStartDesc)
-                    );
-                } else {
-                    bookings = bookingRepository.findAllByItemInAndStatus(
-                            items,
-                            BookingStatus.WAITING,
-                            sortByStartDesc
-                    );
-                }
+                bookings = bookingRepository.findAllByItemInAndStatus(
+                        items,
+                        BookingStatus.WAITING,
+                        customPageableParameters.toPageable(sortByStartDesc)
+                );
                 break;
             case REJECTED:
-                if (customPageableParameters.isCompleted()) {
-                    bookings = bookingRepository.findAllByItemInAndStatus(
-                            items,
-                            BookingStatus.REJECTED,
-                            customPageableParameters.toPageable(sortByStartDesc)
-                    );
-                } else {
-                    bookings = bookingRepository.findAllByItemInAndStatus(
-                            items,
-                            BookingStatus.REJECTED,
-                            sortByStartDesc
-                    );
-                }
+                bookings = bookingRepository.findAllByItemInAndStatus(
+                        items,
+                        BookingStatus.REJECTED,
+                        customPageableParameters.toPageable(sortByStartDesc)
+                );
                 break;
         }
 

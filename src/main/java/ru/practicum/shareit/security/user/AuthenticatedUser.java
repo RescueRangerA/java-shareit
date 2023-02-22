@@ -1,5 +1,6 @@
 package ru.practicum.shareit.security.user;
 
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
 import ru.practicum.shareit.user.model.User;
@@ -8,6 +9,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 @ToString
+@EqualsAndHashCode
 public class AuthenticatedUser implements ExtendedUserDetails {
     private final User user;
 

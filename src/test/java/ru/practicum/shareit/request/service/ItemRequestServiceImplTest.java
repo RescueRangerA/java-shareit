@@ -3,7 +3,6 @@ package ru.practicum.shareit.request.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Sort;
@@ -43,12 +42,14 @@ class ItemRequestServiceImplTest {
 
     private ItemRequestService itemRequestService;
 
+    private final Sort sortByCreatedDesc = Sort.by(new Sort.Order(Sort.Direction.DESC, "created"));
+
     @BeforeEach
     void setUp() {
-        this.itemRequestService = new ItemRequestServiceImpl(
-                this.itemRequestRepository,
-                this.modelMapper,
-                this.authenticationFacade
+        itemRequestService = new ItemRequestServiceImpl(
+                itemRequestRepository,
+                modelMapper,
+                authenticationFacade
         );
     }
 
@@ -72,7 +73,7 @@ class ItemRequestServiceImplTest {
 
         ItemRequestWithItemsResponseDto actualItem = itemRequestService.findById(itemRequestId);
 
-        assertThat(actualItem, hasToString(expectedItemRequestWithItemsResponseDto.toString()));
+        assertThat(actualItem, equalTo(expectedItemRequestWithItemsResponseDto));
     }
 
     @Test
@@ -93,7 +94,7 @@ class ItemRequestServiceImplTest {
         List<ItemRequestWithItemsResponseDto> actualItems = itemRequestService.findAllForCurrentUser();
 
         assertThat(actualItems.size(), equalTo(1));
-        assertThat(actualItems.get(0), hasToString(expectedItemRequestWithItemsResponseDto.toString()));
+        assertThat(actualItems.get(0), equalTo(expectedItemRequestWithItemsResponseDto));
     }
 
     @Test
@@ -107,13 +108,17 @@ class ItemRequestServiceImplTest {
         ItemRequestWithItemsResponseDto expectedItemRequestWithItemsResponseDto = new ItemRequestWithItemsResponseDto();
 
         when(authenticationFacade.getCurrentUserDetails()).thenReturn(userDetails);
-        when(itemRequestRepository.findAllByRequestor_IdNot(eq(userId), ArgumentMatchers.any(Sort.class))).thenReturn(itemRequestList);
+        when(itemRequestRepository.findAllByRequestor_IdNot(
+                        eq(userId),
+                        eq(CustomPageableParameters.of(0L, 10).toPageable(sortByCreatedDesc))
+                )
+        ).thenReturn(itemRequestList);
         when(modelMapper.toItemRequestWithItemsResponseDto(itemRequest)).thenReturn(expectedItemRequestWithItemsResponseDto);
 
-        List<ItemRequestWithItemsResponseDto> actualItems = itemRequestService.findAllCreatedByOthers(CustomPageableParameters.empty());
+        List<ItemRequestWithItemsResponseDto> actualItems = itemRequestService.findAllCreatedByOthers(CustomPageableParameters.of(0L, 10));
 
         assertThat(actualItems.size(), equalTo(1));
-        assertThat(actualItems.get(0), hasToString(expectedItemRequestWithItemsResponseDto.toString()));
+        assertThat(actualItems.get(0), equalTo(expectedItemRequestWithItemsResponseDto));
     }
 
     @Test
@@ -134,6 +139,6 @@ class ItemRequestServiceImplTest {
         ItemRequestResponseDto actualItemRequestResponseDto = itemRequestService.create(createItemRequestRequestDto);
 
         verify(itemRequestRepository).save(itemRequest);
-        assertThat(actualItemRequestResponseDto, hasToString(expectedItemRequestResponseDto.toString()));
+        assertThat(actualItemRequestResponseDto, equalTo(expectedItemRequestResponseDto));
     }
 }

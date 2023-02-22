@@ -30,7 +30,7 @@ class AuthenticatedUserDetailsServiceTest {
 
     @BeforeEach
     void setUp() {
-        this.userDetailsService = new AuthenticatedUserDetailsService(this.userRepository);
+        userDetailsService = new AuthenticatedUserDetailsService(userRepository);
     }
 
     @Test
@@ -55,7 +55,7 @@ class AuthenticatedUserDetailsServiceTest {
 
         UserDetails actualAuthenticatedUser = userDetailsService.loadUserByUsername(username);
 
-        assertThat(authenticatedUser, hasToString(actualAuthenticatedUser.toString()));
+        assertThat(authenticatedUser, equalTo(actualAuthenticatedUser));
     }
 
     @Test
@@ -80,6 +80,6 @@ class AuthenticatedUserDetailsServiceTest {
 
         UserDetails actualAuthenticatedUser = userDetailsService.loadUserById(userId);
 
-        assertThat(authenticatedUser, hasToString(actualAuthenticatedUser.toString()));
+        assertThat(authenticatedUser, equalTo(actualAuthenticatedUser));
     }
 }

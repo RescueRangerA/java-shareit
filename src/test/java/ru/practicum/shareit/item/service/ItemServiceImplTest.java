@@ -6,13 +6,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.generic.ExtendedEntityNotFoundException;
 import ru.practicum.shareit.extension.CustomPageableParameters;
+import ru.practicum.shareit.extension.ExtendedPageRequest;
 import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.exception.NotAllowedToAddComments;
 import ru.practicum.shareit.item.model.Comment;
@@ -55,17 +55,17 @@ class ItemServiceImplTest {
 
         @Override
         public Item getItem() {
-            return this.item;
+            return item;
         }
 
         @Override
         public Booking getLastBooking() {
-            return this.lastBooking;
+            return lastBooking;
         }
 
         @Override
         public Booking getNextBooking() {
-            return this.nextBooking;
+            return nextBooking;
         }
     }
 
@@ -94,13 +94,13 @@ class ItemServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        this.itemService = new ItemServiceImpl(
-                this.itemRepository,
-                this.bookingRepository,
-                this.itemCommentRepository,
-                this.itemRequestRepository,
-                this.modelMapper,
-                this.authenticationFacade
+        itemService = new ItemServiceImpl(
+                itemRepository,
+                bookingRepository,
+                itemCommentRepository,
+                itemRequestRepository,
+                modelMapper,
+                authenticationFacade
         );
     }
 
@@ -117,7 +117,7 @@ class ItemServiceImplTest {
                 itemRepository.findAllAvailableTrueByOwner_IdWithClosestBookings(
                         eq(currentUser.getId()),
                         ArgumentMatchers.any(LocalDateTime.class),
-                        eq(Pageable.unpaged())
+                        eq(ExtendedPageRequest.ofOffset(0L, 10))
                 )
         )
                 .thenReturn(List.of(projection));
@@ -130,19 +130,18 @@ class ItemServiceImplTest {
         )
                 .thenReturn(expectedItemResponseWithBookingDto);
 
-        List<ItemResponseWithBookingDto> actualItems = itemService.findAll(CustomPageableParameters.empty());
+        List<ItemResponseWithBookingDto> actualItems = itemService.findAll(CustomPageableParameters.of(0L, 10));
         assertThat(actualItems.size(), equalTo(1));
-        assertThat(actualItems.get(0), hasToString(expectedItemResponseWithBookingDto.toString()));
+        assertThat(actualItems.get(0), equalTo(expectedItemResponseWithBookingDto));
     }
 
     @Test
     void findByText_whenQueryIsEmptyString_thenReturnedEmptyCollectionImmediately() {
-        List<ItemResponseDto> items = itemService.findByText("",CustomPageableParameters.empty());
+        List<ItemResponseDto> items = itemService.findByText("", CustomPageableParameters.of(0L, 10));
         assertThat(items.size(), equalTo(0));
 
         verifyNoInteractions(itemRepository);
     }
-
 
     @Test
     void findByText_whenItemFound_thenItemsCollectionInResult() {
@@ -150,14 +149,17 @@ class ItemServiceImplTest {
         ItemResponseDto expectedItemResponseDto = new ItemResponseDto();
         String query = "name";
 
-        when(itemRepository.findAllAvailableTrueAndNameOrDescriptionLikeIgnoreCase(query, Pageable.unpaged()))
+        when(itemRepository.findAllAvailableTrueAndNameOrDescriptionLikeIgnoreCase(
+                query,
+                ExtendedPageRequest.ofOffset(0L, 10))
+        )
                 .thenReturn(List.of(item));
 
         when(modelMapper.toItemResponseDto(item)).thenReturn(expectedItemResponseDto);
 
-        List<ItemResponseDto> actualItems = itemService.findByText(query,CustomPageableParameters.empty());
+        List<ItemResponseDto> actualItems = itemService.findByText(query, CustomPageableParameters.of(0L, 10));
         assertThat(actualItems.size(), equalTo(1));
-        assertThat(actualItems.get(0), hasToString(expectedItemResponseDto.toString()));
+        assertThat(actualItems.get(0), equalTo(expectedItemResponseDto));
     }
 
     @Test
@@ -189,7 +191,7 @@ class ItemServiceImplTest {
         ItemResponseWithBookingDto actualItem = itemService.findOne(itemId);
         verifyNoInteractions(bookingRepository);
 
-        assertThat(actualItem, hasToString(expectedItemResponseWithBookingDto.toString()));
+        assertThat(actualItem, equalTo(expectedItemResponseWithBookingDto));
     }
 
     @Test
@@ -219,7 +221,7 @@ class ItemServiceImplTest {
         ItemResponseWithBookingDto actualItem = itemService.findOne(itemId);
         verify(bookingRepository).findByItemAndStartIsBefore(eq(item), ArgumentMatchers.any(LocalDateTime.class));
         verify(bookingRepository).findByItemAndFinishIsAfter(eq(item), ArgumentMatchers.any(LocalDateTime.class));
-        assertThat(actualItem, hasToString(expectedItemResponseWithBookingDto.toString()));
+        assertThat(actualItem, equalTo(expectedItemResponseWithBookingDto));
     }
 
     @Test
@@ -237,7 +239,7 @@ class ItemServiceImplTest {
         ItemResponseDto actualItemDto = itemService.create(createItemRequestDto);
 
         verify(itemRepository).save(itemToSave);
-        assertThat(actualItemDto, hasToString(expectedItemDto.toString()));
+        assertThat(actualItemDto, equalTo(expectedItemDto));
     }
 
     @Test
@@ -327,7 +329,7 @@ class ItemServiceImplTest {
         assertThat(updatedOldItem.getDescription(), equalTo(updateItemRequestDto.getDescription()));
         assertThat(updatedOldItem.getAvailable(), equalTo(updateItemRequestDto.getAvailable()));
 
-        assertThat(actualItemResponseDto, hasToString(expectedItemResponseDto.toString()));
+        assertThat(actualItemResponseDto, equalTo(expectedItemResponseDto));
     }
 
     @Test
@@ -412,7 +414,7 @@ class ItemServiceImplTest {
         );
         verify(itemCommentRepository).save(comment);
 
-        assertThat(actualItemCommentResponseDto, hasToString(expectedItemCommentResponseDto.toString()));
+        assertThat(actualItemCommentResponseDto, equalTo(expectedItemCommentResponseDto));
     }
 
 

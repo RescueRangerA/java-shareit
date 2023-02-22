@@ -39,7 +39,7 @@ class BookingControllerValidationTestIT {
 
     @BeforeEach
     void setUp() {
-        this.mockMvc = MockMvcBuilders
+        mockMvc = MockMvcBuilders
                 .webAppContextSetup(context)
                 .build();
     }

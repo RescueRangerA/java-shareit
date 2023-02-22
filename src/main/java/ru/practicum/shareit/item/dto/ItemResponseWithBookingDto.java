@@ -10,6 +10,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
+@EqualsAndHashCode
 public class ItemResponseWithBookingDto {
     private Long id;
 

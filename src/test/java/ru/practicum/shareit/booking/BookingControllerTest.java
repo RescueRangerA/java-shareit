@@ -15,10 +15,8 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasToString;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class BookingControllerTest {
@@ -30,7 +28,7 @@ class BookingControllerTest {
     private BookingController bookingController;
 
     @Captor
-    ArgumentCaptor<CustomPageableParameters> customPageableParametersArgumentCaptor;
+    private ArgumentCaptor<CustomPageableParameters> customPageableParametersArgumentCaptor;
 
     @Test
     void create_whenInvoked_thenReturnedBookingDto() {
@@ -40,7 +38,8 @@ class BookingControllerTest {
         when(bookingService.create(createBookingDto)).thenReturn(expectedBookingDto);
 
         ResponseBookingDto actualBookingDto = bookingController.create(createBookingDto);
-        assertThat(actualBookingDto, hasToString(expectedBookingDto.toString()));
+        verify(bookingService).create(createBookingDto);
+        assertThat(actualBookingDto, equalTo(expectedBookingDto));
     }
 
     @Test
@@ -51,7 +50,8 @@ class BookingControllerTest {
         when(bookingService.updateStatus(bookingId, BookingStatus.APPROVED)).thenReturn(expectedBookingDto);
 
         ResponseBookingDto actualBookingDto = bookingController.updateBookingStatus(bookingId, true);
-        assertThat(actualBookingDto, hasToString(expectedBookingDto.toString()));
+        verify(bookingService).updateStatus(bookingId, BookingStatus.APPROVED);
+        assertThat(actualBookingDto, equalTo(expectedBookingDto));
     }
 
     @Test
@@ -62,7 +62,8 @@ class BookingControllerTest {
         when(bookingService.updateStatus(bookingId, BookingStatus.REJECTED)).thenReturn(expectedBookingDto);
 
         ResponseBookingDto actualBookingDto = bookingController.updateBookingStatus(bookingId, false);
-        assertThat(actualBookingDto, hasToString(expectedBookingDto.toString()));
+        verify(bookingService).updateStatus(bookingId, BookingStatus.REJECTED);
+        assertThat(actualBookingDto, equalTo(expectedBookingDto));
     }
 
     @Test
@@ -73,7 +74,8 @@ class BookingControllerTest {
         when(bookingService.findOne(bookingId)).thenReturn(expectedBookingDto);
 
         ResponseBookingDto actualBookingDto = bookingController.get(bookingId);
-        assertThat(actualBookingDto, hasToString(expectedBookingDto.toString()));
+        verify(bookingService).findOne(bookingId);
+        assertThat(actualBookingDto, equalTo(expectedBookingDto));
     }
 
     @Test
@@ -83,13 +85,17 @@ class BookingControllerTest {
         when(
                 bookingService.findAllBookedByCurrentUserByStatusOrderByDateDesc(
                         any(SearchBookingStatus.class),
-                        any(CustomPageableParameters.class)
+                        eq(CustomPageableParameters.of(0L, 10))
                 )
         )
                 .thenReturn(expectedBookingDtos);
 
-        List<ResponseBookingDto> actualBookingDtos = bookingController.getAllByStatus(SearchBookingStatus.ALL, null, null);
-        assertThat(actualBookingDtos, hasToString(expectedBookingDtos.toString()));
+        List<ResponseBookingDto> actualBookingDtos = bookingController.getAllByStatus(SearchBookingStatus.ALL, 0L, 10);
+        verify(bookingService).findAllBookedByCurrentUserByStatusOrderByDateDesc(
+                any(SearchBookingStatus.class),
+                eq(CustomPageableParameters.of(0L, 10))
+        );
+        assertThat(actualBookingDtos, equalTo(expectedBookingDtos));
     }
 
     @Test
@@ -105,8 +111,11 @@ class BookingControllerTest {
                 .thenReturn(expectedBookingDtos);
 
         List<ResponseBookingDto> actualBookingDtos = bookingController.getAllByStatus(SearchBookingStatus.ALL, 1L, 2);
-
-        assertThat(actualBookingDtos, hasToString(expectedBookingDtos.toString()));
+        verify(bookingService).findAllBookedByCurrentUserByStatusOrderByDateDesc(
+                any(SearchBookingStatus.class),
+                any(CustomPageableParameters.class)
+        );
+        assertThat(actualBookingDtos, equalTo(expectedBookingDtos));
 
         verify(bookingService).findAllBookedByCurrentUserByStatusOrderByDateDesc(
                 any(SearchBookingStatus.class),
@@ -123,16 +132,20 @@ class BookingControllerTest {
         when(
                 bookingService.findAllForCurrentUserItemsByStatusOrderByDateDesc(
                         any(SearchBookingStatus.class),
-                        any(CustomPageableParameters.class)
+                        eq(CustomPageableParameters.of(0L, 10))
                 )
         )
                 .thenReturn(expectedBookingDtos);
 
         List<ResponseBookingDto> actualBookingDtos = bookingController.getAllForCurrentUserByStatus(
                 SearchBookingStatus.ALL,
-                null,
-                null
+                0L,
+                10
         );
-        assertThat(actualBookingDtos, hasToString(expectedBookingDtos.toString()));
+        verify(bookingService).findAllForCurrentUserItemsByStatusOrderByDateDesc(
+                any(SearchBookingStatus.class),
+                eq(CustomPageableParameters.of(0L, 10))
+        );
+        assertThat(actualBookingDtos, equalTo(expectedBookingDtos));
     }
 }

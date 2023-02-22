@@ -12,8 +12,7 @@ import ru.practicum.shareit.item.service.ItemService;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasToString;
-import static org.mockito.ArgumentMatchers.any;
+import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -30,10 +29,11 @@ class ItemControllerTest {
     void getAllItems_whenInvoked_thenReturnedItemDtos() {
         List<ItemResponseWithBookingDto> expectedItemDtos = List.of(new ItemResponseWithBookingDto());
 
-        when(itemService.findAll(any(CustomPageableParameters.class))).thenReturn(expectedItemDtos);
+        when(itemService.findAll(eq(CustomPageableParameters.of(0L, 10)))).thenReturn(expectedItemDtos);
 
-        List<ItemResponseWithBookingDto> actualItemDtos = itemController.getAllItems(null, null);
-        assertThat(actualItemDtos, hasToString(expectedItemDtos.toString()));
+        List<ItemResponseWithBookingDto> actualItemDtos = itemController.getAllItems(0L, 10);
+        verify(itemService).findAll(eq(CustomPageableParameters.of(0L, 10)));
+        assertThat(actualItemDtos, equalTo(expectedItemDtos));
     }
 
     @Test
@@ -41,21 +41,23 @@ class ItemControllerTest {
         String query = "query";
         List<ItemResponseDto> expectedItemDtos = List.of(new ItemResponseDto());
 
-        when(itemService.findByText(eq(query),any(CustomPageableParameters.class))).thenReturn(expectedItemDtos);
+        when(itemService.findByText(eq(query), eq(CustomPageableParameters.of(0L, 10)))).thenReturn(expectedItemDtos);
 
-        List<ItemResponseDto> actualItemDtos = itemController.findByText(query,null, null);
-        assertThat(actualItemDtos, hasToString(expectedItemDtos.toString()));
+        List<ItemResponseDto> actualItemDtos = itemController.findByText(query, 0L, 10);
+        verify(itemService).findByText(eq(query), eq(CustomPageableParameters.of(0L, 10)));
+        assertThat(actualItemDtos, equalTo(expectedItemDtos));
     }
 
     @Test
     void getItem_whenInvoked_thenReturnedItemDto() {
         Long itemId = 0L;
-        ItemResponseWithBookingDto expectedUserDto = new ItemResponseWithBookingDto();
+        ItemResponseWithBookingDto expectedItemDto = new ItemResponseWithBookingDto();
 
-        when(itemService.findOne(itemId)).thenReturn(expectedUserDto);
+        when(itemService.findOne(itemId)).thenReturn(expectedItemDto);
 
         ItemResponseWithBookingDto actualItemDto = itemController.getItem(itemId);
-        assertThat(actualItemDto, hasToString(expectedUserDto.toString()));
+        verify(itemService).findOne(itemId);
+        assertThat(actualItemDto, equalTo(expectedItemDto));
     }
 
     @Test
@@ -66,7 +68,8 @@ class ItemControllerTest {
         when(itemService.create(createItemRequestDto)).thenReturn(expectedItemDto);
 
         ItemResponseDto actualItemDto = itemController.createItem(createItemRequestDto);
-        assertThat(actualItemDto, hasToString(expectedItemDto.toString()));
+        verify(itemService).create(createItemRequestDto);
+        assertThat(actualItemDto, equalTo(expectedItemDto));
     }
 
     @Test
@@ -78,7 +81,8 @@ class ItemControllerTest {
         when(itemService.update(itemId, updateItemRequestDto)).thenReturn(expectedItemDto);
 
         ItemResponseDto actualItemDto = itemController.updateItem(itemId, updateItemRequestDto);
-        assertThat(actualItemDto, hasToString(expectedItemDto.toString()));
+        verify(itemService).update(itemId, updateItemRequestDto);
+        assertThat(actualItemDto, equalTo(expectedItemDto));
     }
 
     @Test
@@ -97,6 +101,7 @@ class ItemControllerTest {
         when(itemService.addComment(itemId, createItemCommentDto)).thenReturn(expectedItemCommentResponseDto);
 
         ItemCommentResponseDto actualItemCommentResponseDto = itemController.addComment(itemId, createItemCommentDto);
-        assertThat(actualItemCommentResponseDto, hasToString(expectedItemCommentResponseDto.toString()));
+        verify(itemService).addComment(itemId, createItemCommentDto);
+        assertThat(actualItemCommentResponseDto, equalTo(expectedItemCommentResponseDto));
     }
 }

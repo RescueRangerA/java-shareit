@@ -59,15 +59,17 @@ class BookingServiceImplTest {
     private BookingService bookingService;
 
     @Captor
-    ArgumentCaptor<ExtendedPageRequest> extendedPageRequestArgumentCaptor;
+    private ArgumentCaptor<ExtendedPageRequest> extendedPageRequestArgumentCaptor;
+
+    private final Sort sortByStartDesc = Sort.by(new Sort.Order(Sort.Direction.DESC, "start"));
 
     @BeforeEach
     void setUp() {
-        this.bookingService = new BookingServiceImpl(
-                this.bookingRepository,
-                this.itemRepository,
-                this.authenticationFacade,
-                this.mapper
+        bookingService = new BookingServiceImpl(
+                bookingRepository,
+                itemRepository,
+                authenticationFacade,
+                mapper
         );
     }
 
@@ -153,7 +155,7 @@ class BookingServiceImplTest {
         ResponseBookingDto actualResponseBookingDto = bookingService.create(createBookingDto);
         verify(bookingRepository).save(booking);
 
-        assertThat(actualResponseBookingDto, hasToString(expectedResponseBookingDto.toString()));
+        assertThat(actualResponseBookingDto, equalTo(expectedResponseBookingDto));
     }
 
     @Test
@@ -223,7 +225,7 @@ class BookingServiceImplTest {
 
         ResponseBookingDto actualResponseBookingDto = bookingService.findOne(bookingId);
 
-        assertThat(actualResponseBookingDto, hasToString(expectedResponseBookingDto.toString()));
+        assertThat(actualResponseBookingDto, equalTo(expectedResponseBookingDto));
     }
 
     @Test
@@ -324,7 +326,7 @@ class BookingServiceImplTest {
 
         ResponseBookingDto actualResponseBookingDto = bookingService.updateStatus(bookingId, BookingStatus.APPROVED);
 
-        assertThat(actualResponseBookingDto, hasToString(expectedResponseBookingDto.toString()));
+        assertThat(actualResponseBookingDto, equalTo(expectedResponseBookingDto));
     }
 
     @Test
@@ -340,16 +342,19 @@ class BookingServiceImplTest {
         ResponseBookingDto expectedResponseBookingDto = new ResponseBookingDto();
 
         when(authenticationFacade.getCurrentUserDetails()).thenReturn(userDetails);
-        when(bookingRepository.findAllByBooker_Id(eq(userId), ArgumentMatchers.any(Sort.class))).thenReturn(bookings);
+        when(bookingRepository.findAllByBooker_Id(
+                eq(userId),
+                eq(CustomPageableParameters.of(0L,10).toPageable(sortByStartDesc)))
+        ).thenReturn(bookings);
         when(mapper.toResponseBookingDto(booking)).thenReturn(expectedResponseBookingDto);
 
         List<ResponseBookingDto> actualBookings = bookingService.findAllBookedByCurrentUserByStatusOrderByDateDesc(
                 SearchBookingStatus.ALL,
-                CustomPageableParameters.empty()
+                CustomPageableParameters.of(0L,10)
         );
 
         assertThat(actualBookings.size(), equalTo(1));
-        assertThat(actualBookings.get(0), hasToString(expectedResponseBookingDto.toString()));
+        assertThat(actualBookings.get(0), equalTo(expectedResponseBookingDto));
     }
 
     @Test
@@ -374,7 +379,7 @@ class BookingServiceImplTest {
         );
 
         assertThat(actualBookings.size(), equalTo(1));
-        assertThat(actualBookings.get(0), hasToString(expectedResponseBookingDto.toString()));
+        assertThat(actualBookings.get(0), equalTo(expectedResponseBookingDto));
 
         verify(bookingRepository).findAllByBooker_Id(eq(userId), extendedPageRequestArgumentCaptor.capture());
         assertThat(extendedPageRequestArgumentCaptor.getValue().getSort().getOrderFor("start"), equalTo(Sort.Order.desc("start")));
@@ -399,18 +404,18 @@ class BookingServiceImplTest {
                 eq(userId),
                 ArgumentMatchers.any(LocalDateTime.class),
                 ArgumentMatchers.any(LocalDateTime.class),
-                ArgumentMatchers.any(Sort.class)
+                eq(CustomPageableParameters.of(0L,10).toPageable(sortByStartDesc))
         ))
                 .thenReturn(bookings);
         when(mapper.toResponseBookingDto(booking)).thenReturn(expectedResponseBookingDto);
 
         List<ResponseBookingDto> actualBookings = bookingService.findAllBookedByCurrentUserByStatusOrderByDateDesc(
                 SearchBookingStatus.CURRENT,
-                CustomPageableParameters.empty()
+                CustomPageableParameters.of(0L,10)
         );
 
         assertThat(actualBookings.size(), equalTo(1));
-        assertThat(actualBookings.get(0), hasToString(expectedResponseBookingDto.toString()));
+        assertThat(actualBookings.get(0), equalTo(expectedResponseBookingDto));
     }
 
     @Test
@@ -429,18 +434,18 @@ class BookingServiceImplTest {
         when(bookingRepository.findByBooker_IdAndFinishIsBefore(
                 eq(userId),
                 ArgumentMatchers.any(LocalDateTime.class),
-                eq(Sort.by(new Sort.Order(Sort.Direction.DESC, "start")))
+                eq(CustomPageableParameters.of(0L,10).toPageable(sortByStartDesc))
         ))
                 .thenReturn(bookings);
         when(mapper.toResponseBookingDto(booking)).thenReturn(expectedResponseBookingDto);
 
         List<ResponseBookingDto> actualBookings = bookingService.findAllBookedByCurrentUserByStatusOrderByDateDesc(
                 SearchBookingStatus.PAST,
-                CustomPageableParameters.empty()
+                CustomPageableParameters.of(0L,10)
         );
 
         assertThat(actualBookings.size(), equalTo(1));
-        assertThat(actualBookings.get(0), hasToString(expectedResponseBookingDto.toString()));
+        assertThat(actualBookings.get(0), equalTo(expectedResponseBookingDto));
     }
 
     @Test
@@ -459,18 +464,18 @@ class BookingServiceImplTest {
         when(bookingRepository.findByBooker_IdAndStartIsAfter(
                 eq(userId),
                 ArgumentMatchers.any(LocalDateTime.class),
-                eq(Sort.by(new Sort.Order(Sort.Direction.DESC, "start")))
+                eq(CustomPageableParameters.of(0L,10).toPageable(sortByStartDesc))
         ))
                 .thenReturn(bookings);
         when(mapper.toResponseBookingDto(booking)).thenReturn(expectedResponseBookingDto);
 
         List<ResponseBookingDto> actualBookings = bookingService.findAllBookedByCurrentUserByStatusOrderByDateDesc(
                 SearchBookingStatus.FUTURE,
-                CustomPageableParameters.empty()
+                CustomPageableParameters.of(0L,10)
         );
 
         assertThat(actualBookings.size(), equalTo(1));
-        assertThat(actualBookings.get(0), hasToString(expectedResponseBookingDto.toString()));
+        assertThat(actualBookings.get(0), equalTo(expectedResponseBookingDto));
     }
 
     @Test
@@ -489,18 +494,18 @@ class BookingServiceImplTest {
         when(bookingRepository.findAllByBooker_IdAndStatus(
                 eq(userId),
                 eq(BookingStatus.WAITING),
-                ArgumentMatchers.any(Sort.class)
+                eq(CustomPageableParameters.of(0L,10).toPageable(sortByStartDesc))
         ))
                 .thenReturn(bookings);
         when(mapper.toResponseBookingDto(booking)).thenReturn(expectedResponseBookingDto);
 
         List<ResponseBookingDto> actualBookings = bookingService.findAllBookedByCurrentUserByStatusOrderByDateDesc(
                 SearchBookingStatus.WAITING,
-                CustomPageableParameters.empty()
+                CustomPageableParameters.of(0L,10)
         );
 
         assertThat(actualBookings.size(), equalTo(1));
-        assertThat(actualBookings.get(0), hasToString(expectedResponseBookingDto.toString()));
+        assertThat(actualBookings.get(0), equalTo(expectedResponseBookingDto));
     }
 
     @Test
@@ -519,18 +524,18 @@ class BookingServiceImplTest {
         when(bookingRepository.findAllByBooker_IdAndStatus(
                 eq(userId),
                 eq(BookingStatus.REJECTED),
-                ArgumentMatchers.any(Sort.class)
+                eq(CustomPageableParameters.of(0L,10).toPageable(sortByStartDesc))
         ))
                 .thenReturn(bookings);
         when(mapper.toResponseBookingDto(booking)).thenReturn(expectedResponseBookingDto);
 
         List<ResponseBookingDto> actualBookings = bookingService.findAllBookedByCurrentUserByStatusOrderByDateDesc(
                 SearchBookingStatus.REJECTED,
-                CustomPageableParameters.empty()
+                CustomPageableParameters.of(0L,10)
         );
 
         assertThat(actualBookings.size(), equalTo(1));
-        assertThat(actualBookings.get(0), hasToString(expectedResponseBookingDto.toString()));
+        assertThat(actualBookings.get(0), equalTo(expectedResponseBookingDto));
     }
 
     @Test
@@ -552,18 +557,18 @@ class BookingServiceImplTest {
         when(itemRepository.findAllByOwner_Id(userId)).thenReturn(items);
         when(bookingRepository.findAllByItemIn(
                 eq(items),
-                ArgumentMatchers.any(Sort.class)
+                eq(CustomPageableParameters.of(0L,10).toPageable(sortByStartDesc))
         ))
                 .thenReturn(bookings);
         when(mapper.toResponseBookingDto(booking)).thenReturn(expectedResponseBookingDto);
 
         List<ResponseBookingDto> actualBookings = bookingService.findAllForCurrentUserItemsByStatusOrderByDateDesc(
                 SearchBookingStatus.ALL,
-                CustomPageableParameters.empty()
+                CustomPageableParameters.of(0L,10)
         );
 
         assertThat(actualBookings.size(), equalTo(1));
-        assertThat(actualBookings.get(0), hasToString(expectedResponseBookingDto.toString()));
+        assertThat(actualBookings.get(0), equalTo(expectedResponseBookingDto));
     }
 
     @Test
@@ -587,18 +592,18 @@ class BookingServiceImplTest {
                 eq(items),
                 ArgumentMatchers.any(LocalDateTime.class),
                 ArgumentMatchers.any(LocalDateTime.class),
-                eq(Sort.by(new Sort.Order(Sort.Direction.DESC, "start")))
+                eq(CustomPageableParameters.of(0L,10).toPageable(sortByStartDesc))
         ))
                 .thenReturn(bookings);
         when(mapper.toResponseBookingDto(booking)).thenReturn(expectedResponseBookingDto);
 
         List<ResponseBookingDto> actualBookings = bookingService.findAllForCurrentUserItemsByStatusOrderByDateDesc(
                 SearchBookingStatus.CURRENT,
-                CustomPageableParameters.empty()
+                CustomPageableParameters.of(0L,10)
         );
 
         assertThat(actualBookings.size(), equalTo(1));
-        assertThat(actualBookings.get(0), hasToString(expectedResponseBookingDto.toString()));
+        assertThat(actualBookings.get(0), equalTo(expectedResponseBookingDto));
     }
 
     @Test
@@ -621,18 +626,18 @@ class BookingServiceImplTest {
         when(bookingRepository.findByItemInAndFinishIsBefore(
                 eq(items),
                 ArgumentMatchers.any(LocalDateTime.class),
-                eq(Sort.by(new Sort.Order(Sort.Direction.DESC, "start")))
+                eq(CustomPageableParameters.of(0L,10).toPageable(sortByStartDesc))
         ))
                 .thenReturn(bookings);
         when(mapper.toResponseBookingDto(booking)).thenReturn(expectedResponseBookingDto);
 
         List<ResponseBookingDto> actualBookings = bookingService.findAllForCurrentUserItemsByStatusOrderByDateDesc(
                 SearchBookingStatus.PAST,
-                CustomPageableParameters.empty()
+                CustomPageableParameters.of(0L,10)
         );
 
         assertThat(actualBookings.size(), equalTo(1));
-        assertThat(actualBookings.get(0), hasToString(expectedResponseBookingDto.toString()));
+        assertThat(actualBookings.get(0), equalTo(expectedResponseBookingDto));
     }
 
     @Test
@@ -655,18 +660,18 @@ class BookingServiceImplTest {
         when(bookingRepository.findByItemInAndStartIsAfter(
                 eq(items),
                 ArgumentMatchers.any(LocalDateTime.class),
-                eq(Sort.by(new Sort.Order(Sort.Direction.DESC, "start")))
+                eq(CustomPageableParameters.of(0L,10).toPageable(sortByStartDesc))
         ))
                 .thenReturn(bookings);
         when(mapper.toResponseBookingDto(booking)).thenReturn(expectedResponseBookingDto);
 
         List<ResponseBookingDto> actualBookings = bookingService.findAllForCurrentUserItemsByStatusOrderByDateDesc(
                 SearchBookingStatus.FUTURE,
-                CustomPageableParameters.empty()
+                CustomPageableParameters.of(0L,10)
         );
 
         assertThat(actualBookings.size(), equalTo(1));
-        assertThat(actualBookings.get(0), hasToString(expectedResponseBookingDto.toString()));
+        assertThat(actualBookings.get(0), equalTo(expectedResponseBookingDto));
     }
 
     @Test
@@ -689,18 +694,18 @@ class BookingServiceImplTest {
         when(bookingRepository.findAllByItemInAndStatus(
                 eq(items),
                 eq(BookingStatus.WAITING),
-                ArgumentMatchers.any(Sort.class)
+                eq(CustomPageableParameters.of(0L,10).toPageable(sortByStartDesc))
         ))
                 .thenReturn(bookings);
         when(mapper.toResponseBookingDto(booking)).thenReturn(expectedResponseBookingDto);
 
         List<ResponseBookingDto> actualBookings = bookingService.findAllForCurrentUserItemsByStatusOrderByDateDesc(
                 SearchBookingStatus.WAITING,
-                CustomPageableParameters.empty()
+                CustomPageableParameters.of(0L,10)
         );
 
         assertThat(actualBookings.size(), equalTo(1));
-        assertThat(actualBookings.get(0), hasToString(expectedResponseBookingDto.toString()));
+        assertThat(actualBookings.get(0), equalTo(expectedResponseBookingDto));
     }
 
     @Test
@@ -723,17 +728,17 @@ class BookingServiceImplTest {
         when(bookingRepository.findAllByItemInAndStatus(
                 eq(items),
                 eq(BookingStatus.REJECTED),
-                ArgumentMatchers.any(Sort.class)
+                eq(CustomPageableParameters.of(0L,10).toPageable(sortByStartDesc))
         ))
                 .thenReturn(bookings);
         when(mapper.toResponseBookingDto(booking)).thenReturn(expectedResponseBookingDto);
 
         List<ResponseBookingDto> actualBookings = bookingService.findAllForCurrentUserItemsByStatusOrderByDateDesc(
                 SearchBookingStatus.REJECTED,
-                CustomPageableParameters.empty()
+                CustomPageableParameters.of(0L,10)
         );
 
         assertThat(actualBookings.size(), equalTo(1));
-        assertThat(actualBookings.get(0), hasToString(expectedResponseBookingDto.toString()));
+        assertThat(actualBookings.get(0), equalTo(expectedResponseBookingDto));
     }
 }

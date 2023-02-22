@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 @ToString
+@EqualsAndHashCode
 public class CustomPageableParameters {
     private final Long offset;
 
@@ -23,28 +24,16 @@ public class CustomPageableParameters {
         return offset;
     }
 
-    public static CustomPageableParameters empty() {
-        return new CustomPageableParameters(null, null);
-    }
-
     public static CustomPageableParameters of(Long offset, Integer size) {
         return new CustomPageableParameters(offset, size);
     }
 
-    public Boolean isCompleted() {
-        return this.offset != null && this.size != null;
-    }
-
     public Pageable toPageable() {
-        return this.isCompleted()
-                ? ExtendedPageRequest.ofOffset(this.offset, this.size)
-                : Pageable.unpaged();
+        return ExtendedPageRequest.ofOffset(this.offset, this.size);
     }
 
     public Pageable toPageable(Sort sort) {
-        return this.isCompleted()
-                ? ExtendedPageRequest.ofOffset(this.offset, this.size, sort)
-                : Pageable.unpaged();
+        return ExtendedPageRequest.ofOffset(this.offset, this.size, sort);
     }
 }
 

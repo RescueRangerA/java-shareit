@@ -51,8 +51,8 @@ public class BookingController {
     @GetMapping
     public List<ResponseBookingDto> getAllByStatus(
             @RequestParam(defaultValue = SearchBookingStatus.DEFAULT, required = false) SearchBookingStatus state,
-            @RequestParam(required = false) @PositiveOrZero Long from,
-            @RequestParam(required = false) @Positive Integer size
+            @RequestParam(required = false, defaultValue = "0") @PositiveOrZero Long from,
+            @RequestParam(required = false, defaultValue = "10") @Positive Integer size
     ) {
         return this.bookingService.findAllBookedByCurrentUserByStatusOrderByDateDesc(
                 state,
@@ -63,8 +63,8 @@ public class BookingController {
     @GetMapping("/owner")
     public List<ResponseBookingDto> getAllForCurrentUserByStatus(
             @RequestParam(defaultValue = SearchBookingStatus.DEFAULT, required = false) SearchBookingStatus state,
-            @RequestParam(required = false) @PositiveOrZero Long from,
-            @RequestParam(required = false) @Positive Integer size
+            @RequestParam(required = false, defaultValue = "0") @PositiveOrZero Long from,
+            @RequestParam(required = false, defaultValue = "10") @Positive Integer size
     ) {
         return this.bookingService.findAllForCurrentUserItemsByStatusOrderByDateDesc(
                 state,

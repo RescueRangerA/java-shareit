@@ -35,7 +35,7 @@ class TokenAuthenticationFilterTest {
 
     @BeforeEach
     void setUp() {
-        this.filter = new TokenAuthenticationFilter(
+        filter = new TokenAuthenticationFilter(
                 userDetailsService,
                 resolver
         );

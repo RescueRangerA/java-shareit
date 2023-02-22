@@ -55,7 +55,7 @@ class ItemControllerSecurityTestIT {
 
     @BeforeEach
     void setUp() {
-        this.mockMvc = MockMvcBuilders
+        mockMvc = MockMvcBuilders
                 .webAppContextSetup(context)
                 .apply(springSecurity())
                 .build();
@@ -206,31 +206,6 @@ class ItemControllerSecurityTestIT {
                 )
                 .andExpect(status().isOk());
     }
-
-//    @SneakyThrows
-//    @Test
-//    void createItem_whenSuccessfullyAuthenticated_thenExpectOkStatus() {
-//        CreateItemRequestDto createItemRequestDto = new CreateItemRequestDto(
-//                "name",
-//                "desc",
-//                true
-//        );
-//        mockUserForSecurity();
-//
-//        mockMvc.perform(
-//                        post("/items")
-//                                .contentType(APPLICATION_JSON_UTF8)
-//                                .content(asJsonString(createItemRequestDto))
-//                                .header(HEADER_NAME, currentUserDetails.getId())
-//                )
-//                .andExpect(status().isOk());
-//
-//        ArgumentCaptor<CreateItemRequestDto> createItemRequestDtoArgumentCaptor = ArgumentCaptor.forClass(CreateItemRequestDto.class);
-//
-//
-//        verify(itemService).create(createItemRequestDtoArgumentCaptor.capture());
-//        assertThat(createItemRequestDtoArgumentCaptor.getValue(), hasToString(createItemRequestDto.toString()));
-//    }
 
     @SneakyThrows
     @Test

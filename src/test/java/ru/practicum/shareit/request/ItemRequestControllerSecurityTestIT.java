@@ -53,7 +53,7 @@ class ItemRequestControllerSecurityTestIT {
 
     @BeforeEach
     void setUp() {
-        this.mockMvc = MockMvcBuilders
+        mockMvc = MockMvcBuilders
                 .webAppContextSetup(context)
                 .apply(springSecurity())
                 .build();

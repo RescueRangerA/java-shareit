@@ -39,7 +39,7 @@ class UserServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        this.userService = new UserServiceImpl(this.userRepository, this.modelMapper);
+        userService = new UserServiceImpl(userRepository, modelMapper);
     }
 
     @Test
@@ -54,7 +54,7 @@ class UserServiceImplTest {
 
         Mockito.verify(userRepository).findAll();
         assertThat(actualUsers.size(), equalTo(1));
-        assertThat(actualUsers.get(0), hasToString(expectedUser.toString()));
+        assertThat(actualUsers.get(0), equalTo(expectedUser));
     }
 
     @Test
@@ -77,7 +77,7 @@ class UserServiceImplTest {
         when(modelMapper.toUserResponseDto(user)).thenReturn(expectedUser);
 
         UserResponseDto actualUser = userService.findOne(userId);
-        assertThat(actualUser, hasToString(expectedUser.toString()));
+        assertThat(actualUser, equalTo(expectedUser));
     }
 
     @Test
@@ -102,7 +102,7 @@ class UserServiceImplTest {
         UserResponseDto actualUserDto = userService.create(createUserDto);
 
         verify(userRepository).save(userToSave);
-        assertThat(actualUserDto, hasToString(expectedUserDto.toString()));
+        assertThat(actualUserDto, equalTo(expectedUserDto));
     }
 
     @Test
@@ -153,7 +153,7 @@ class UserServiceImplTest {
         assertThat(updatedOldUser.getUsername(), equalTo(updateUserRequestDto.getName()));
         assertThat(updatedOldUser.getEmail(), equalTo(updateUserRequestDto.getEmail()));
 
-        assertThat(actualUserResponseDto, hasToString(expectedUserResponseDto.toString()));
+        assertThat(actualUserResponseDto, equalTo(expectedUserResponseDto));
     }
 
     @Test

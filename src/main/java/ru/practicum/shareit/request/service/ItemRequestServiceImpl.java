@@ -60,9 +60,9 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         ExtendedUserDetails currentUserDetails = authenticationFacade.getCurrentUserDetails();
         Sort sortByCreatedDesc = Sort.by(new Sort.Order(Sort.Direction.DESC, "created"));
 
-        List<ItemRequest> items = customPageableParameters.isCompleted()
-                ? itemRequestRepository.findAllByRequestor_IdNot(currentUserDetails.getId(), customPageableParameters.toPageable(sortByCreatedDesc))
-                : itemRequestRepository.findAllByRequestor_IdNot(currentUserDetails.getId(), sortByCreatedDesc
+        List<ItemRequest> items = itemRequestRepository.findAllByRequestor_IdNot(
+                currentUserDetails.getId(),
+                customPageableParameters.toPageable(sortByCreatedDesc)
         );
 
         return items

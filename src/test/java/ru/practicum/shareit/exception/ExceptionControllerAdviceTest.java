@@ -29,7 +29,7 @@ class ExceptionControllerAdviceTest {
 
     @BeforeEach
     void setUp() {
-        this.controllerAdvice = new ExceptionControllerAdvice();
+        controllerAdvice = new ExceptionControllerAdvice();
     }
 
     @Test

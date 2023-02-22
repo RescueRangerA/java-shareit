@@ -14,8 +14,7 @@ import ru.practicum.shareit.request.service.ItemRequestService;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasToString;
-import static org.mockito.ArgumentMatchers.any;
+import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,7 +34,7 @@ class ItemRequestControllerTest {
         when(itemRequestService.findById(itemRequestId)).thenReturn(expectedItemRequestWithItemsResponseDto);
 
         ItemRequestWithItemsResponseDto actualItemRequestWithItemsResponseDto = itemRequestController.findById(itemRequestId);
-        assertThat(actualItemRequestWithItemsResponseDto, hasToString(expectedItemRequestWithItemsResponseDto.toString()));
+        assertThat(actualItemRequestWithItemsResponseDto, equalTo(expectedItemRequestWithItemsResponseDto));
     }
 
     @Test
@@ -48,7 +47,7 @@ class ItemRequestControllerTest {
                 .thenReturn(expectedItemRequestWithItemsResponseDtos);
 
         List<ItemRequestWithItemsResponseDto> actualItemRequestWithItemsResponseDtos = itemRequestController.findAllForCurrentUser();
-        assertThat(actualItemRequestWithItemsResponseDtos, hasToString(expectedItemRequestWithItemsResponseDtos.toString()));
+        assertThat(actualItemRequestWithItemsResponseDtos, equalTo(expectedItemRequestWithItemsResponseDtos));
     }
 
     @Test
@@ -56,12 +55,12 @@ class ItemRequestControllerTest {
         List<ItemRequestWithItemsResponseDto> expectedItemRequestWithItemsResponseDtos = List.of(new ItemRequestWithItemsResponseDto());
 
         when(
-                itemRequestService.findAllCreatedByOthers(any(CustomPageableParameters.class))
+                itemRequestService.findAllCreatedByOthers(CustomPageableParameters.of(0L,10))
         )
                 .thenReturn(expectedItemRequestWithItemsResponseDtos);
 
-        List<ItemRequestWithItemsResponseDto> actualItemRequestWithItemsResponseDtos = itemRequestController.findAllForOtherUsers(null, null);
-        assertThat(actualItemRequestWithItemsResponseDtos, hasToString(expectedItemRequestWithItemsResponseDtos.toString()));
+        List<ItemRequestWithItemsResponseDto> actualItemRequestWithItemsResponseDtos = itemRequestController.findAllForOtherUsers(0L, 10);
+        assertThat(actualItemRequestWithItemsResponseDtos, equalTo(expectedItemRequestWithItemsResponseDtos));
     }
 
     @Test
@@ -72,6 +71,6 @@ class ItemRequestControllerTest {
         when(itemRequestService.create(createItemRequestRequestDto)).thenReturn(expectedItemRequestResponseDto);
 
         ItemRequestResponseDto actualItemRequestResponseDto = itemRequestController.create(createItemRequestRequestDto);
-        assertThat(actualItemRequestResponseDto, hasToString(expectedItemRequestResponseDto.toString()));
+        assertThat(actualItemRequestResponseDto, equalTo(expectedItemRequestResponseDto));
     }
 }
