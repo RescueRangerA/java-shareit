@@ -9,6 +9,10 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.dto.CreateItemRequestRequestDto;
+import ru.practicum.shareit.request.dto.ItemRequestResponseDto;
+import ru.practicum.shareit.request.dto.ItemRequestWithItemsResponseDto;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.dto.CreateUserRequestDto;
 import ru.practicum.shareit.user.dto.UserResponseDto;
 import ru.practicum.shareit.user.model.User;
@@ -58,7 +62,8 @@ public class ModelMapper {
                 item.getDescription(),
                 item.getAvailable(),
                 item.getOwner().getId(),
-                item.getComments().stream().map(this::toItemCommentResponseDto).collect(Collectors.toSet())
+                item.getComments().stream().map(this::toItemCommentResponseDto).collect(Collectors.toSet()),
+                item.getRequestOptional().map(ItemRequest::getId).orElse(null)
         );
     }
 
@@ -75,14 +80,15 @@ public class ModelMapper {
         );
     }
 
-    public Item toItem(CreateItemRequestDto itemRequestDto, User user) {
+    public Item toItem(CreateItemRequestDto itemRequestDto, User user, Optional<ItemRequest> itemRequest) {
         return new Item(
                 null,
                 itemRequestDto.getName(),
                 itemRequestDto.getDescription(),
                 itemRequestDto.getAvailable(),
                 user,
-                Collections.emptySet()
+                Collections.emptySet(),
+                itemRequest.orElse(null)
         );
     }
 
@@ -118,6 +124,33 @@ public class ModelMapper {
                 comment.getText(),
                 comment.getAuthor().getUsername(),
                 comment.getCreated()
+        );
+    }
+
+    public ItemRequestResponseDto toItemRequestResponseDto(ItemRequest itemRequest) {
+        return new ItemRequestResponseDto(
+                itemRequest.getId(),
+                itemRequest.getDescription(),
+                itemRequest.getCreated()
+        );
+    }
+
+    public ItemRequestWithItemsResponseDto toItemRequestWithItemsResponseDto(ItemRequest itemRequest) {
+        return new ItemRequestWithItemsResponseDto(
+                itemRequest.getId(),
+                itemRequest.getDescription(),
+                itemRequest.getCreated(),
+                itemRequest.getItems().stream().map(this::toItemResponseDto).collect(Collectors.toSet())
+        );
+    }
+
+    public ItemRequest toItemRequest(CreateItemRequestRequestDto itemRequest, User user) {
+        return new ItemRequest(
+                null,
+                itemRequest.getDescription(),
+                user,
+                LocalDateTime.now(),
+                Collections.emptySet()
         );
     }
 }

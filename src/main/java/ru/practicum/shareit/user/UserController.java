@@ -1,5 +1,6 @@
 package ru.practicum.shareit.user;
 
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.dto.CreateUserRequestDto;
 import ru.practicum.shareit.user.dto.UpdateUserRequestDto;
@@ -12,6 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping(path = "/users")
+@Validated
 public class UserController {
     private final UserService userService;
 
@@ -25,22 +27,31 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    public UserResponseDto getUser(@PathVariable @Positive Long userId) {
+    public UserResponseDto getUser(
+            @PathVariable @Positive Long userId
+    ) {
         return userService.findOne(userId);
     }
 
     @PostMapping
-    public UserResponseDto createUser(@Valid @RequestBody CreateUserRequestDto createUserRequestDto) {
+    public UserResponseDto createUser(
+            @RequestBody @Valid CreateUserRequestDto createUserRequestDto
+    ) {
         return userService.create(createUserRequestDto);
     }
 
     @PatchMapping("/{userId}")
-    public UserResponseDto updateUser(@PathVariable @Positive Long userId, @Valid @RequestBody UpdateUserRequestDto updateUserRequestDto) {
+    public UserResponseDto updateUser(
+            @PathVariable @Positive Long userId,
+            @RequestBody @Valid UpdateUserRequestDto updateUserRequestDto
+    ) {
         return userService.update(userId, updateUserRequestDto);
     }
 
     @DeleteMapping("/{userId}")
-    public void deleteUser(@PathVariable @Positive Long userId) {
+    public void deleteUser(
+            @PathVariable @Positive Long userId
+    ) {
         userService.removeById(userId);
     }
 }

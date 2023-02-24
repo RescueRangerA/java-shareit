@@ -20,6 +20,7 @@ import ru.practicum.shareit.security.exception.IncorrectAuthHeader;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.ConstraintViolationException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,14 +29,14 @@ import java.util.Map;
 @Slf4j
 public class ExceptionControllerAdvice {
     @ExceptionHandler
-    public ResponseEntity<Map<String, Object>> handleConflict(MethodArgumentTypeMismatchException ex) {
+    public ResponseEntity<Map<String, Object>> handleEnumTypeMismatch(MethodArgumentTypeMismatchException ex) {
         Map<String, Object> body = new HashMap<>();
         body.put("error", String.format("Unknown %s: %s", ex.getName(), ex.getValue()));
 
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler({ImmutableBookingStatus.class, IncorrectAuthHeader.class, ItemIsUnavailable.class, NotAllowedToAddComments.class})
+    @ExceptionHandler({ImmutableBookingStatus.class, IncorrectAuthHeader.class, ItemIsUnavailable.class, NotAllowedToAddComments.class, ConstraintViolationException.class})
     public void handleBadRequest(final Exception e, HttpServletResponse response) throws IOException {
         logIfNeeded(e);
         response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());

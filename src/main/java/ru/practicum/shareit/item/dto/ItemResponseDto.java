@@ -1,9 +1,6 @@
 package ru.practicum.shareit.item.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.Set;
 
@@ -11,6 +8,8 @@ import java.util.Set;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
+@EqualsAndHashCode
 public class ItemResponseDto {
     private Long id;
 
@@ -23,4 +22,6 @@ public class ItemResponseDto {
     private Long ownerId;
 
     private Set<ItemCommentResponseDto> comments;
+
+    private Long requestId;
 }

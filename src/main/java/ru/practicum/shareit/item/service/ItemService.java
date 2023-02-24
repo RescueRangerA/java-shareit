@@ -1,13 +1,14 @@
 package ru.practicum.shareit.item.service;
 
+import ru.practicum.shareit.extension.CustomPageableParameters;
 import ru.practicum.shareit.item.dto.*;
 
 import java.util.List;
 
 public interface ItemService {
-    List<ItemResponseWithBookingDto> findAll();
+    List<ItemResponseWithBookingDto> findAll(CustomPageableParameters customPageableParameters);
 
-    List<ItemResponseDto> findByText(String text);
+    List<ItemResponseDto> findByText(String text, CustomPageableParameters customPageableParameters);
 
     ItemResponseWithBookingDto findOne(Long itemId);
 
