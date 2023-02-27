@@ -1,10 +1,6 @@
 package ru.practicum.shareit.item.dto;
 
 import lombok.*;
-import org.springframework.lang.Nullable;
-
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 
 @Getter
 @Setter
@@ -13,16 +9,11 @@ import javax.validation.constraints.NotNull;
 @ToString
 public class CreateItemRequestDto {
 
-    @NotNull
-    @NotBlank
     private String name;
 
-    @NotNull
     private String description;
 
-    @NotNull
     private Boolean available;
 
-    @Nullable
     private Long requestId;
 }

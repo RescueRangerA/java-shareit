@@ -4,8 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.lang.Nullable;
-import ru.practicum.shareit.validation.email.ExtendedEmailValidator;
 
 @Getter
 @Setter
@@ -13,10 +11,7 @@ import ru.practicum.shareit.validation.email.ExtendedEmailValidator;
 @NoArgsConstructor
 public class UpdateUserRequestDto {
 
-    @Nullable
     private String name;
 
-    @Nullable
-    @ExtendedEmailValidator
     private String email;
 }
