@@ -32,7 +32,7 @@ public class BookingController {
     ) {
         log.info("Creating booking {}, userId={}", createBookingDto, userId);
 
-        return this.bookingClient.create(userId, createBookingDto);
+        return bookingClient.create(userId, createBookingDto);
     }
 
     @PatchMapping("/{bookingId}")
@@ -43,7 +43,7 @@ public class BookingController {
     ) {
         log.info("Set approve for booking {}, approved={}, userId={}", bookingId, approved, userId);
 
-        return this.bookingClient.updateStatus(userId, bookingId, approved);
+        return bookingClient.updateStatus(userId, bookingId, approved);
     }
 
     @GetMapping("/{bookingId}")
@@ -53,7 +53,7 @@ public class BookingController {
     ) {
         log.info("Get booking {}, userId={}", bookingId, userId);
 
-        return this.bookingClient.findOne(userId, bookingId);
+        return bookingClient.findOne(userId, bookingId);
     }
 
     @GetMapping
@@ -65,7 +65,7 @@ public class BookingController {
     ) {
         log.info("Get booking with state {}, userId={}, from={}, size={}", state, userId, from, size);
 
-        return this.bookingClient.findAllBookedByCurrentUserByStatusOrderByDateDesc(
+        return bookingClient.findAllBookedByCurrentUserByStatusOrderByDateDesc(
                 userId,
                 state,
                 from,
@@ -82,7 +82,7 @@ public class BookingController {
     ) {
         log.info("Get booking for current user with state {}, userId={}, from={}, size={}", state, userId, from, size);
 
-        return this.bookingClient.findAllForCurrentUserItemsByStatusOrderByDateDesc(
+        return bookingClient.findAllForCurrentUserItemsByStatusOrderByDateDesc(
                 userId,
                 state,
                 from,
